@@ -537,6 +537,66 @@ border-radius: 20px; cursor: pointer; transition: all 0.2s; font-weight: 600;
 }
 .analyze-btn:hover { background: rgba(179,136,214,0.22); transform: translateY(-1px); }
 
+/* SEARCH STOCK BTN */
+.search-stock-btn {
+margin: 8px 12px 2px;
+padding: 8px 12px;
+width: calc(100% - 24px);
+background: var(–surface2);
+border: 1.5px dashed var(–border2);
+border-radius: 12px;
+color: var(–accent); font-family: ‘DM Sans’, sans-serif; font-size: 0.72rem;
+font-weight: 600; cursor: pointer; transition: all 0.18s;
+text-align: left;
+}
+.search-stock-btn:hover { background: rgba(232,84,122,0.06); border-color: var(–accent); }
+
+/* GLOBAL NEWS */
+.gnews-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+@media(max-width:900px){ .gnews-grid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:600px){ .gnews-grid { grid-template-columns: 1fr; } }
+.gnews-card {
+padding: 12px 14px; border-radius: 14px;
+border: 1.5px solid var(–border); background: var(–surface2);
+transition: transform 0.15s, box-shadow 0.15s;
+}
+.gnews-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,84,122,0.1); }
+.gnews-impact {
+display: inline-flex; align-items: center; gap: 5px;
+font-size: 0.55rem; font-weight: 700; letter-spacing: 0.1em;
+text-transform: uppercase; padding: 3px 8px; border-radius: 20px; margin-bottom: 7px;
+}
+.impact-bull { background: rgba(91,191,142,0.12); color: var(–green); border: 1px solid rgba(91,191,142,0.3); }
+.impact-bear { background: rgba(232,84,122,0.1); color: var(–red); border: 1px solid rgba(232,84,122,0.3); }
+.impact-mixed { background: rgba(245,166,35,0.1); color: var(–yellow); border: 1px solid rgba(245,166,35,0.3); }
+.gnews-headline { font-size: 0.72rem; font-weight: 500; line-height: 1.55; color: var(–text); margin-bottom: 6px; }
+.gnews-meta { font-size: 0.58rem; color: var(–muted2); margin-bottom: 6px; }
+.gnews-affected {
+font-size: 0.58rem; color: var(–muted2); border-top: 1px solid var(–border);
+padding-top: 6px; margin-top: 4px;
+}
+.gnews-affected .sym-chip {
+display: inline-block; padding: 1px 6px; border-radius: 6px; margin: 1px 2px;
+font-size: 0.58rem; font-weight: 600; cursor: pointer;
+border: 1px solid var(–border2); background: var(–surface); color: var(–accent);
+transition: background 0.15s;
+}
+.gnews-affected .sym-chip:hover { background: rgba(232,84,122,0.08); }
+
+/* STOCK SEARCH RESULTS */
+.search-result-item {
+padding: 9px 12px; border-radius: 12px; cursor: pointer;
+border: 1.5px solid var(–border); margin-bottom: 5px;
+display: flex; justify-content: space-between; align-items: center;
+background: var(–surface2); transition: all 0.15s;
+}
+.search-result-item:hover { border-color: var(–pink); background: rgba(244,114,168,0.05); }
+.search-result-item .sr-sym { font-weight: 700; font-size: 0.82rem; color: var(–text); }
+.search-result-item .sr-name { font-size: 0.63rem; color: var(–muted2); margin-top: 1px; }
+.search-result-item .sr-right { text-align: right; }
+.search-result-item .sr-price { font-size: 0.78rem; font-family: ‘DM Mono’, monospace; }
+.search-result-item .sr-sig { font-size: 0.6rem; font-weight: 700; }
+
 /* SHIMMER on cards */
 @keyframes shimmer {
 0% { background-position: -200% 0; }
@@ -576,8 +636,9 @@ border-radius: 20px; cursor: pointer; transition: all 0.2s; font-weight: 600;
   <!-- SIDEBAR -->
   <aside>
     <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="Search symbol..." />
+      <input type="text" id="sidebarSearch" placeholder="Filter watchlist..." oninput="filterWatchlist(this.value)" />
     </div>
+    <button class="search-stock-btn" onclick="openSearchModal()">🔍 Search Any Stock</button>
     <div class="watchlist-header">Watchlist</div>
     <div class="watchlist" id="watchlist"></div>
     <button class="scan-btn" onclick="runMarketScan()">✦ AI Market Scan</button>
@@ -731,7 +792,7 @@ border-radius: 20px; cursor: pointer; transition: all 0.2s; font-weight: 600;
 
   <!-- News & Catalysts -->
   <div class="panel panel-half">
-    <div class="panel-title">📰 News & Catalysts</div>
+    <div class="panel-title">📰 Stock News & Catalysts</div>
     <div id="newsPanel"></div>
   </div>
 
@@ -741,13 +802,21 @@ border-radius: 20px; cursor: pointer; transition: all 0.2s; font-weight: 600;
     <div id="bretPanel"></div>
   </div>
 
+  <!-- Global News & Market Impact -->
+  <div class="panel panel-full" id="globalNewsPanel">
+    <div class="panel-title">🌍 Global News & Market Impact</div>
+    <div id="globalNewsContent">
+      <div class="loading"><div class="spin"></div> Loading global news...</div>
+    </div>
+  </div>
+
 </div>
 ```
 
   </main>
 </div>
 
-<!-- MODAL -->
+<!-- SCAN MODAL -->
 
 <div class="modal-overlay" id="scanModal" onclick="closeScanModal(event)">
   <div class="modal">
@@ -758,29 +827,160 @@ border-radius: 20px; cursor: pointer; transition: all 0.2s; font-weight: 600;
   </div>
 </div>
 
+<!-- STOCK SEARCH MODAL -->
+
+<div class="modal-overlay" id="searchModal" onclick="closeSearchModal(event)">
+  <div class="modal" style="max-width:520px">
+    <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:4px;background:linear-gradient(135deg,#e8547a,#b388d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">✿ Search Any Stock</div>
+    <div style="font-size:0.63rem;color:var(--muted2);margin-bottom:12px">Type a ticker or company name — covers NYSE, NASDAQ, ETFs & more</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <input id="stockSearchInput" type="text" placeholder="e.g. AAPL, Tesla, Gold ETF..." 
+        style="flex:1;background:var(--surface2);border:1.5px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.8rem;padding:9px 14px;border-radius:12px;outline:none;"
+        oninput="filterStockList(this.value)" onkeydown="if(event.key==='Enter')searchStockAI()"/>
+      <button onclick="searchStockAI()" style="padding:9px 16px;background:linear-gradient(135deg,var(--accent),var(--pink));border:none;border-radius:12px;color:white;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:600;cursor:pointer;">Search ✦</button>
+    </div>
+    <div id="stockSearchResults" style="max-height:340px;overflow-y:auto"></div>
+    <button onclick="closeSearchModal()" style="margin-top:12px;padding:9px 16px;background:var(--surface2);border:1.5px solid var(--border2);color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:0.7rem;border-radius:14px;cursor:pointer;width:100%;">Close ✕</button>
+  </div>
+</div>
+
 <script>
 // ============================
-// DATA
+// FULL STOCK UNIVERSE (~150 stocks)
 // ============================
-const STOCKS = [
-  { sym: 'NVDA', name: 'NVIDIA Corp', price: 892.54, chg: 2.87, signal: 'buy' },
-  { sym: 'AAPL', name: 'Apple Inc', price: 178.32, chg: -0.43, signal: 'watch' },
-  { sym: 'TSLA', name: 'Tesla Inc', price: 245.10, chg: -1.82, signal: 'sell' },
-  { sym: 'META', name: 'Meta Platforms', price: 521.80, chg: 1.23, signal: 'buy' },
-  { sym: 'AMZN', name: 'Amazon.com', price: 198.76, chg: 0.67, signal: 'buy' },
-  { sym: 'MSFT', name: 'Microsoft Corp', price: 415.22, chg: -0.21, signal: 'watch' },
-  { sym: 'GOOGL', name: 'Alphabet Inc', price: 168.44, chg: 0.95, signal: 'watch' },
-  { sym: 'SPY', name: 'S&P 500 ETF', price: 523.90, chg: 0.38, signal: 'buy' },
-  { sym: 'AMD', name: 'Advanced Micro Devices', price: 178.55, chg: 3.20, signal: 'buy' },
-  { sym: 'COIN', name: 'Coinbase Global', price: 225.40, chg: -4.10, signal: 'sell' },
+const ALL_STOCKS = [
+  // Mega Cap Tech
+  { sym:'NVDA', name:'NVIDIA Corporation', sector:'Tech', price:892.54, chg:2.87, signal:'buy' },
+  { sym:'AAPL', name:'Apple Inc', sector:'Tech', price:178.32, chg:-0.43, signal:'watch' },
+  { sym:'MSFT', name:'Microsoft Corporation', sector:'Tech', price:415.22, chg:-0.21, signal:'watch' },
+  { sym:'GOOGL', name:'Alphabet Inc', sector:'Tech', price:168.44, chg:0.95, signal:'watch' },
+  { sym:'META', name:'Meta Platforms', sector:'Tech', price:521.80, chg:1.23, signal:'buy' },
+  { sym:'AMZN', name:'Amazon.com Inc', sector:'Tech', price:198.76, chg:0.67, signal:'buy' },
+  { sym:'TSLA', name:'Tesla Inc', sector:'EV', price:245.10, chg:-1.82, signal:'sell' },
+  { sym:'AMD', name:'Advanced Micro Devices', sector:'Chips', price:178.55, chg:3.20, signal:'buy' },
+  { sym:'INTC', name:'Intel Corporation', sector:'Chips', price:31.40, chg:-2.10, signal:'sell' },
+  { sym:'AVGO', name:'Broadcom Inc', sector:'Chips', price:1412.30, chg:1.45, signal:'buy' },
+  { sym:'QCOM', name:'Qualcomm Inc', sector:'Chips', price:168.90, chg:0.80, signal:'watch' },
+  { sym:'TSM', name:'Taiwan Semiconductor', sector:'Chips', price:148.20, chg:1.90, signal:'buy' },
+  { sym:'MU', name:'Micron Technology', sector:'Chips', price:112.40, chg:2.30, signal:'buy' },
+  { sym:'AMAT', name:'Applied Materials', sector:'Chips', price:198.70, chg:1.10, signal:'buy' },
+  { sym:'LRCX', name:'Lam Research', sector:'Chips', price:890.50, chg:0.65, signal:'watch' },
+  { sym:'ASML', name:'ASML Holding', sector:'Chips', price:990.20, chg:1.20, signal:'buy' },
+  { sym:'ARM', name:'Arm Holdings', sector:'Chips', price:122.40, chg:3.50, signal:'buy' },
+  { sym:'SMCI', name:'Super Micro Computer', sector:'Tech', price:792.30, chg:-5.20, signal:'sell' },
+  { sym:'ORCL', name:'Oracle Corporation', sector:'Tech', price:128.90, chg:0.45, signal:'watch' },
+  { sym:'CRM', name:'Salesforce Inc', sector:'Tech', price:290.10, chg:-0.30, signal:'watch' },
+  { sym:'NOW', name:'ServiceNow Inc', sector:'Tech', price:810.40, chg:1.80, signal:'buy' },
+  { sym:'ADBE', name:'Adobe Inc', sector:'Tech', price:502.30, chg:-1.20, signal:'sell' },
+  { sym:'SNOW', name:'Snowflake Inc', sector:'Tech', price:158.20, chg:2.10, signal:'buy' },
+  { sym:'PLTR', name:'Palantir Technologies', sector:'AI', price:24.80, chg:4.30, signal:'buy' },
+  { sym:'AI', name:'C3.ai Inc', sector:'AI', price:27.40, chg:5.60, signal:'buy' },
+  { sym:'SHOP', name:'Shopify Inc', sector:'Tech', price:72.40, chg:1.40, signal:'watch' },
+  { sym:'UBER', name:'Uber Technologies', sector:'Tech', price:78.30, chg:0.90, signal:'buy' },
+  { sym:'LYFT', name:'Lyft Inc', sector:'Tech', price:14.20, chg:-1.80, signal:'sell' },
+  { sym:'SNAP', name:'Snap Inc', sector:'Tech', price:13.40, chg:-3.20, signal:'sell' },
+  { sym:'PINS', name:'Pinterest Inc', sector:'Tech', price:32.10, chg:1.20, signal:'watch' },
+  { sym:'RBLX', name:'Roblox Corporation', sector:'Tech', price:34.50, chg:-0.80, signal:'watch' },
+  { sym:'SPOT', name:'Spotify Technology', sector:'Tech', price:312.40, chg:2.10, signal:'buy' },
+  { sym:'NET', name:'Cloudflare Inc', sector:'Tech', price:82.30, chg:1.90, signal:'buy' },
+  { sym:'ZS', name:'Zscaler Inc', sector:'Cyber', price:212.40, chg:0.70, signal:'watch' },
+  { sym:'CRWD', name:'CrowdStrike Holdings', sector:'Cyber', price:340.10, chg:2.40, signal:'buy' },
+  { sym:'PANW', name:'Palo Alto Networks', sector:'Cyber', price:290.80, chg:0.50, signal:'watch' },
+  // Finance
+  { sym:'JPM', name:'JPMorgan Chase', sector:'Finance', price:198.40, chg:0.32, signal:'watch' },
+  { sym:'GS', name:'Goldman Sachs', sector:'Finance', price:432.10, chg:0.78, signal:'buy' },
+  { sym:'BAC', name:'Bank of America', sector:'Finance', price:38.20, chg:-0.45, signal:'watch' },
+  { sym:'WFC', name:'Wells Fargo', sector:'Finance', price:57.40, chg:0.22, signal:'watch' },
+  { sym:'V', name:'Visa Inc', sector:'Finance', price:278.90, chg:0.65, signal:'buy' },
+  { sym:'MA', name:'Mastercard Inc', sector:'Finance', price:468.30, chg:0.42, signal:'buy' },
+  { sym:'PYPL', name:'PayPal Holdings', sector:'Finance', price:62.10, chg:-1.30, signal:'sell' },
+  { sym:'SQ', name:'Block Inc', sector:'Finance', price:68.40, chg:2.10, signal:'buy' },
+  { sym:'COIN', name:'Coinbase Global', sector:'Crypto', price:225.40, chg:-4.10, signal:'sell' },
+  { sym:'HOOD', name:'Robinhood Markets', sector:'Finance', price:19.80, chg:3.40, signal:'buy' },
+  { sym:'SCHW', name:'Charles Schwab', sector:'Finance', price:72.30, chg:0.18, signal:'watch' },
+  // Healthcare
+  { sym:'JNJ', name:'Johnson & Johnson', sector:'Health', price:158.40, chg:0.12, signal:'watch' },
+  { sym:'LLY', name:'Eli Lilly', sector:'Health', price:812.40, chg:1.80, signal:'buy' },
+  { sym:'NVO', name:'Novo Nordisk', sector:'Health', price:120.30, chg:-0.60, signal:'watch' },
+  { sym:'MRNA', name:'Moderna Inc', sector:'Health', price:128.40, chg:-2.10, signal:'sell' },
+  { sym:'PFE', name:'Pfizer Inc', sector:'Health', price:27.80, chg:-0.90, signal:'sell' },
+  { sym:'ABBV', name:'AbbVie Inc', sector:'Health', price:178.30, chg:0.44, signal:'watch' },
+  { sym:'UNH', name:'UnitedHealth Group', sector:'Health', price:518.40, chg:0.28, signal:'watch' },
+  { sym:'CVS', name:'CVS Health', sector:'Health', price:74.30, chg:-1.20, signal:'sell' },
+  { sym:'ISRG', name:'Intuitive Surgical', sector:'Health', price:412.80, chg:1.30, signal:'buy' },
+  { sym:'DXCM', name:'Dexcom Inc', sector:'Health', price:82.40, chg:2.10, signal:'buy' },
+  // Energy
+  { sym:'XOM', name:'Exxon Mobil', sector:'Energy', price:112.40, chg:0.78, signal:'watch' },
+  { sym:'CVX', name:'Chevron Corporation', sector:'Energy', price:158.20, chg:0.32, signal:'watch' },
+  { sym:'COP', name:'ConocoPhillips', sector:'Energy', price:118.40, chg:0.55, signal:'watch' },
+  { sym:'OXY', name:'Occidental Petroleum', sector:'Energy', price:60.20, chg:1.10, signal:'buy' },
+  { sym:'SLB', name:'SLB (Schlumberger)', sector:'Energy', price:48.30, chg:0.42, signal:'watch' },
+  { sym:'NEE', name:'NextEra Energy', sector:'Energy', price:70.80, chg:-0.30, signal:'watch' },
+  { sym:'ENPH', name:'Enphase Energy', sector:'Energy', price:112.40, chg:-3.20, signal:'sell' },
+  { sym:'FSLR', name:'First Solar', sector:'Energy', price:178.30, chg:2.80, signal:'buy' },
+  // Consumer
+  { sym:'AMZN', name:'Amazon.com Inc', sector:'Consumer', price:198.76, chg:0.67, signal:'buy' },
+  { sym:'WMT', name:'Walmart Inc', sector:'Consumer', price:68.40, chg:0.22, signal:'watch' },
+  { sym:'COST', name:'Costco Wholesale', sector:'Consumer', price:812.30, chg:0.58, signal:'buy' },
+  { sym:'TGT', name:'Target Corporation', sector:'Consumer', price:148.20, chg:-1.10, signal:'sell' },
+  { sym:'HD', name:'Home Depot', sector:'Consumer', price:378.40, chg:0.34, signal:'watch' },
+  { sym:'NKE', name:'Nike Inc', sector:'Consumer', price:92.30, chg:-0.88, signal:'sell' },
+  { sym:'LULU', name:'Lululemon Athletica', sector:'Consumer', price:378.40, chg:2.30, signal:'buy' },
+  { sym:'SBUX', name:'Starbucks Corp', sector:'Consumer', price:78.20, chg:-1.40, signal:'sell' },
+  { sym:'MCD', name:"McDonald's Corp", sector:'Consumer', price:278.40, chg:0.22, signal:'watch' },
+  { sym:'ABNB', name:'Airbnb Inc', sector:'Consumer', price:148.30, chg:1.80, signal:'buy' },
+  { sym:'BKNG', name:'Booking Holdings', sector:'Consumer', price:3812.40, chg:1.10, signal:'buy' },
+  { sym:'EXPE', name:'Expedia Group', sector:'Consumer', price:142.30, chg:-0.70, signal:'watch' },
+  // ETFs
+  { sym:'SPY', name:'S&P 500 ETF Trust', sector:'ETF', price:523.90, chg:0.38, signal:'buy' },
+  { sym:'QQQ', name:'Invesco QQQ Trust', sector:'ETF', price:448.20, chg:0.72, signal:'buy' },
+  { sym:'IWM', name:'iShares Russell 2000', sector:'ETF', price:198.40, chg:-0.21, signal:'watch' },
+  { sym:'VTI', name:'Vanguard Total Market', sector:'ETF', price:240.80, chg:0.31, signal:'watch' },
+  { sym:'GLD', name:'SPDR Gold Trust', sector:'ETF', price:218.40, chg:0.55, signal:'buy' },
+  { sym:'SLV', name:'iShares Silver Trust', sector:'ETF', price:24.80, chg:1.20, signal:'buy' },
+  { sym:'TLT', name:'iShares 20Y Bond ETF', sector:'ETF', price:92.30, chg:-0.44, signal:'sell' },
+  { sym:'XLK', name:'Tech Sector SPDR', sector:'ETF', price:212.40, chg:0.78, signal:'buy' },
+  { sym:'XLF', name:'Financial Sector SPDR', sector:'ETF', price:42.30, chg:0.22, signal:'watch' },
+  { sym:'XLE', name:'Energy Sector SPDR', sector:'ETF', price:91.40, chg:0.44, signal:'watch' },
+  { sym:'ARKK', name:'ARK Innovation ETF', sector:'ETF', price:48.20, chg:2.10, signal:'buy' },
+  { sym:'SQQQ', name:'ProShares UltraPro Short QQQ', sector:'ETF', price:8.40, chg:-2.10, signal:'sell' },
+  { sym:'TQQQ', name:'ProShares UltraPro QQQ', sector:'ETF', price:68.30, chg:2.20, signal:'buy' },
+  // Industrials & Other
+  { sym:'BA', name:'Boeing Company', sector:'Industrial', price:178.40, chg:-1.20, signal:'sell' },
+  { sym:'CAT', name:'Caterpillar Inc', sector:'Industrial', price:348.20, chg:0.44, signal:'watch' },
+  { sym:'GE', name:'GE Aerospace', sector:'Industrial', price:168.30, chg:1.10, signal:'buy' },
+  { sym:'RTX', name:'RTX Corporation', sector:'Defense', price:98.40, chg:0.32, signal:'watch' },
+  { sym:'LMT', name:'Lockheed Martin', sector:'Defense', price:458.20, chg:0.18, signal:'watch' },
+  { sym:'TSMC', name:'TSMC ADR', sector:'Chips', price:148.20, chg:1.90, signal:'buy' },
+  { sym:'BABA', name:'Alibaba Group', sector:'Tech', price:72.30, chg:-1.40, signal:'sell' },
+  { sym:'BIDU', name:'Baidu Inc', sector:'Tech', price:98.40, chg:-0.80, signal:'sell' },
+  { sym:'JD', name:'JD.com Inc', sector:'Consumer', price:24.30, chg:-1.20, signal:'sell' },
+  { sym:'PDD', name:'PDD Holdings', sector:'Consumer', price:142.30, chg:1.80, signal:'buy' },
+  { sym:'DIS', name:'Walt Disney Co', sector:'Media', price:108.40, chg:0.78, signal:'watch' },
+  { sym:'NFLX', name:'Netflix Inc', sector:'Media', price:712.30, chg:1.30, signal:'buy' },
+  { sym:'PARA', name:'Paramount Global', sector:'Media', price:12.40, chg:-2.80, signal:'sell' },
+  { sym:'WBD', name:'Warner Bros. Discovery', sector:'Media', price:8.20, chg:-3.40, signal:'sell' },
+  { sym:'T', name:'AT&T Inc', sector:'Telecom', price:17.80, chg:0.12, signal:'watch' },
+  { sym:'VZ', name:'Verizon Communications', sector:'Telecom', price:40.30, chg:-0.22, signal:'watch' },
+  { sym:'TMUS', name:'T-Mobile US', sector:'Telecom', price:168.40, chg:0.55, signal:'buy' },
+  { sym:'BRK.B', name:'Berkshire Hathaway B', sector:'Finance', price:412.30, chg:0.28, signal:'watch' },
+  { sym:'BLK', name:'BlackRock Inc', sector:'Finance', price:878.20, chg:0.44, signal:'buy' },
+  { sym:'SPGI', name:'S&P Global Inc', sector:'Finance', price:448.30, chg:0.38, signal:'buy' },
+  { sym:'CME', name:'CME Group', sector:'Finance', price:212.40, chg:0.21, signal:'watch' },
 ];
+
+// Remove duplicates by sym
+const seen = new Set();
+const STOCKS = ALL_STOCKS.filter(s => { if(seen.has(s.sym)) return false; seen.add(s.sym); return true; });
+
+// Watchlist = first 12 (pinned)
+let watchlistSyms = ['NVDA','AAPL','TSLA','META','AMZN','MSFT','GOOGL','SPY','AMD','COIN','PLTR','CRWD'];
 
 const TICKER_TICKERS = ['SPY +0.38%','QQQ +0.72%','IWM -0.21%','VIX 18.4','BTC +1.2%','GOLD +0.55%','DXY -0.3%','10Y 4.31%'];
 
 let currentStock = STOCKS[0];
 let activeIndicators = { vwap: true, ema: true, bb: false, levels: false };
 let chartData = [];
-let chartCtx, volCtx;
 
 // ============================
 // INIT
@@ -791,6 +991,7 @@ window.onload = function() {
   selectStock(STOCKS[0]);
   calcRR();
   setInterval(updatePrices, 3000);
+  loadGlobalNews();
 };
 
 function renderTickerBar() {
@@ -801,10 +1002,17 @@ function renderTickerBar() {
   });
 }
 
-function renderWatchlist() {
+function getWatchlistStocks() {
+  return watchlistSyms.map(sym => STOCKS.find(s => s.sym === sym)).filter(Boolean);
+}
+
+function renderWatchlist(filter='') {
   const wl = document.getElementById('watchlist');
   wl.innerHTML = '';
-  STOCKS.forEach(s => {
+  const list = getWatchlistStocks().filter(s =>
+    !filter || s.sym.toLowerCase().includes(filter) || s.name.toLowerCase().includes(filter)
+  );
+  list.forEach(s => {
     const neg = s.chg < 0;
     const badgeClass = s.signal === 'buy' ? 'badge-buy' : s.signal === 'sell' ? 'badge-sell' : 'badge-watch';
     const el = document.createElement('div');
@@ -813,24 +1021,35 @@ function renderWatchlist() {
     el.innerHTML = `
       <div>
         <div class="sym">${s.sym}</div>
-        <div class="name">${s.name.split(' ')[0]}</div>
+        <div class="name">${s.name.split(' ').slice(0,2).join(' ')}</div>
         <div><span class="signal-badge ${badgeClass}">${s.signal}</span></div>
       </div>
       <div class="price-col">
         <div class="price ${neg?'red':'green'}">$${s.price.toFixed(2)}</div>
-        <div class="chg ${neg?'red':'green'}">${neg?'':'+'}${s.chg}%</div>
+        <div class="chg ${neg?'red':'green'}">${neg?'':'+'}${s.chg.toFixed(2)}%</div>
       </div>`;
     wl.appendChild(el);
   });
 }
 
+function filterWatchlist(val) {
+  renderWatchlist(val.toLowerCase());
+}
+
 function selectStock(s) {
+  // If not in stocks list, add it
+  if (!STOCKS.find(x => x.sym === s.sym)) STOCKS.push(s);
+  // Add to watchlist if not there
+  if (!watchlistSyms.includes(s.sym)) {
+    watchlistSyms.unshift(s.sym);
+    if (watchlistSyms.length > 20) watchlistSyms.pop();
+  }
   currentStock = s;
   document.getElementById('headerSym').textContent = s.sym;
-  document.getElementById('headerName').textContent = s.name + ' · NASDAQ';
+  document.getElementById('headerName').textContent = s.name + ' · ' + (s.sector||'') + ' · ' + (s.exchange||'NASDAQ');
   document.getElementById('headerPrice').textContent = `$${s.price.toFixed(2)}`;
   document.getElementById('headerPrice').className = 'stock-price ' + (s.chg >= 0 ? 'green' : 'red');
-  document.getElementById('headerChange').innerHTML = `<span class="${s.chg>=0?'green':'red'}">${s.chg>=0?'+':''}${s.chg}% today</span>`;
+  document.getElementById('headerChange').innerHTML = `<span class="${s.chg>=0?'green':'red'}">${s.chg>=0?'+':''}${s.chg.toFixed(2)}% today</span>`;
   renderAISignal(s);
   renderAllPanels(s);
   generateChartData(s);
@@ -840,12 +1059,12 @@ function selectStock(s) {
   document.getElementById('rrStop').value = (s.price * 0.983).toFixed(2);
   document.getElementById('rrTarget').value = (s.price * 1.048).toFixed(2);
   calcRR();
-  document.getElementById('aiAnalysisText').innerHTML = '<span class="thinking">Click "AI Analyze" to generate real-time market analysis...</span>';
+  document.getElementById('aiAnalysisText').innerHTML = '<span class="thinking">Click "✨ AI Analyze" to generate real-time market analysis...</span>';
 }
 
 function renderAISignal(s) {
   const cls = s.signal;
-  const icon = cls === 'buy' ? '🟢' : cls === 'sell' ? '🔴' : '🟡';
+  const icon = cls === 'buy' ? '🌸' : cls === 'sell' ? '🌹' : '🌼';
   const label = cls === 'buy' ? 'STRONG BUY' : cls === 'sell' ? 'STRONG SELL' : 'NEUTRAL WATCH';
   const conf = cls === 'buy' ? '84' : cls === 'sell' ? '78' : '61';
   const color = cls === 'buy' ? 'var(--green)' : cls === 'sell' ? 'var(--red)' : 'var(--yellow)';
@@ -1611,16 +1830,17 @@ function closeScanModal(e) {
 // PRICE UPDATES
 // ============================
 function updatePrices() {
-  STOCKS.forEach(s => {
+  getWatchlistStocks().forEach(s => {
     const move = (Math.random() - 0.48) * s.price * 0.001;
-    s.price = Math.max(1, s.price + move);
-    s.chg = parseFloat((s.chg + (Math.random() - 0.5) * 0.02).toFixed(2));
+    s.price = Math.max(0.5, s.price + move);
+    s.chg = parseFloat((s.chg + (Math.random() - 0.5) * 0.03).toFixed(2));
   });
   if (currentStock) {
     const cur = STOCKS.find(s => s.sym === currentStock.sym);
     if (cur) {
+      cur.price = Math.max(0.5, cur.price + (Math.random() - 0.48) * cur.price * 0.001);
       document.getElementById('headerPrice').textContent = `$${cur.price.toFixed(2)}`;
-      document.getElementById('headerChange').innerHTML = `<span class="${cur.chg>=0?'green':'red'}">${cur.chg>=0?'+':''}${cur.chg}% today</span>`;
+      document.getElementById('headerChange').innerHTML = `<span class="${cur.chg>=0?'green':'red'}">${cur.chg>=0?'+':''}${cur.chg.toFixed(2)}% today</span>`;
     }
   }
   renderWatchlist();
@@ -1629,14 +1849,211 @@ function updatePrices() {
 // Resize chart on window resize
 window.addEventListener('resize', () => { if (chartData.length) drawChart(); });
 
-// Search filter
-document.getElementById('searchInput').addEventListener('input', function() {
-  const q = this.value.toLowerCase();
-  document.querySelectorAll('.stock-item').forEach((el, i) => {
-    const s = STOCKS[i];
-    el.style.display = (!q || s.sym.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)) ? '' : 'none';
-  });
-});
+// ============================
+// STOCK SEARCH MODAL
+// ============================
+function openSearchModal() {
+  document.getElementById('searchModal').classList.add('show');
+  document.getElementById('stockSearchInput').value = '';
+  renderSearchResults('');
+  setTimeout(() => document.getElementById('stockSearchInput').focus(), 100);
+}
+
+function closeSearchModal(e) {
+  if (!e || e.target === document.getElementById('searchModal')) {
+    document.getElementById('searchModal').classList.remove('show');
+  }
+}
+
+function filterStockList(val) {
+  renderSearchResults(val.toLowerCase().trim());
+}
+
+function renderSearchResults(q) {
+  const container = document.getElementById('stockSearchResults');
+  if (!q) {
+    // Show popular / sectors
+    container.innerHTML = `<div style="font-size:0.6rem;color:var(--muted2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.12em">✦ Popular & Recent</div>` +
+      STOCKS.slice(0, 18).map(s => searchCard(s)).join('');
+    return;
+  }
+  const results = STOCKS.filter(s =>
+    s.sym.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || (s.sector||'').toLowerCase().includes(q)
+  ).slice(0, 20);
+  if (results.length === 0) {
+    container.innerHTML = `
+      <div style="text-align:center;padding:20px;color:var(--muted2)">
+        <div style="font-size:1.4rem">🔍</div>
+        <div style="font-size:0.72rem;margin-top:6px">No results for "${q}"</div>
+        <button onclick="searchStockAI()" style="margin-top:10px;padding:7px 14px;background:linear-gradient(135deg,var(--accent),var(--pink));border:none;border-radius:10px;color:white;font-family:'DM Sans',sans-serif;font-size:0.7rem;cursor:pointer;">Ask AI to look it up ✦</button>
+      </div>`;
+    return;
+  }
+  container.innerHTML = `<div style="font-size:0.6rem;color:var(--muted2);margin-bottom:8px">${results.length} results</div>` +
+    results.map(s => searchCard(s)).join('');
+}
+
+function searchCard(s) {
+  const neg = s.chg < 0;
+  const sigColor = s.signal==='buy'?'var(--green)':s.signal==='sell'?'var(--red)':'var(--yellow)';
+  return `<div class="search-result-item" onclick="selectStock(STOCKS.find(x=>x.sym==='${s.sym}')||${JSON.stringify(s)});closeSearchModal()">
+    <div>
+      <div class="sr-sym">${s.sym} <span style="font-size:0.6rem;color:var(--muted2);font-weight:400">${s.sector||''}</span></div>
+      <div class="sr-name">${s.name}</div>
+    </div>
+    <div class="sr-right">
+      <div class="sr-price ${neg?'red':'green'}">$${s.price.toFixed(2)}</div>
+      <div class="sr-sig" style="color:${sigColor}">${s.signal.toUpperCase()}</div>
+    </div>
+  </div>`;
+}
+
+async function searchStockAI() {
+  const q = document.getElementById('stockSearchInput').value.trim();
+  if (!q) return;
+  const container = document.getElementById('stockSearchResults');
+  container.innerHTML = '<div class="loading"><div class="spin"></div> Searching with AI...</div>';
+
+  const existing = STOCKS.filter(s =>
+    s.sym.toLowerCase().includes(q.toLowerCase()) || s.name.toLowerCase().includes(q.toLowerCase())
+  );
+  if (existing.length > 0) {
+    renderSearchResults(q.toLowerCase());
+    return;
+  }
+
+  if (!_offlineMode) {
+    const prompt = `A user is searching for a stock with query: "${q}". Return a JSON array of up to 6 matching stocks.
+Each object: { sym, name, sector, exchange, price, chg, signal } where signal is "buy","sell", or "watch", price is a realistic number, chg is a small % like 1.2 or -0.8.
+Return ONLY valid JSON array, no markdown.`;
+    const result = await callClaude(prompt);
+    if (result.ok) {
+      try {
+        const found = JSON.parse(result.text.replace(/```json|```/g,'').trim());
+        found.forEach(s => { if (!STOCKS.find(x=>x.sym===s.sym)) STOCKS.push(s); });
+        container.innerHTML = `<div style="font-size:0.6rem;color:var(--muted2);margin-bottom:8px">✦ AI Results for "${q}"</div>` +
+          found.map(s => searchCard(s)).join('');
+        return;
+      } catch(_) {}
+    }
+  }
+  container.innerHTML = `<div style="padding:16px;text-align:center;color:var(--muted2);font-size:0.7rem">No results found for "${q}". Try a ticker symbol like AAPL or NVDA.</div>`;
+}
+
+// ============================
+// GLOBAL NEWS & MARKET IMPACT
+// ============================
+const GLOBAL_NEWS_FALLBACK = [
+  {
+    headline: 'Federal Reserve holds rates steady, signals 2 cuts possible in 2025',
+    source: 'Reuters', time: '1h ago', impact: 'bull',
+    summary: 'Fed Chair signals patient approach. Rate-sensitive stocks and growth tech likely to benefit from easing pressure on valuations.',
+    affected: ['SPY','QQQ','NVDA','META','AAPL','MSFT','AMZN','GOOGL']
+  },
+  {
+    headline: 'US CPI inflation comes in hotter than expected at 3.5% — above 3.2% forecast',
+    source: 'Bloomberg', time: '2h ago', impact: 'bear',
+    summary: 'Higher inflation reduces likelihood of near-term rate cuts. Bond yields rising — pressure on growth stocks, financials may outperform.',
+    affected: ['TLT','QQQ','NVDA','TSLA','ARKK','PLTR']
+  },
+  {
+    headline: 'China announces $1T stimulus package targeting domestic consumption',
+    source: 'CNBC', time: '3h ago', impact: 'bull',
+    summary: 'Massive stimulus boosts China-exposed equities and commodities. Luxury, energy, and semiconductor exports likely to benefit.',
+    affected: ['BABA','JD','PDD','XOM','CVX','SLB','GLD']
+  },
+  {
+    headline: 'OPEC+ cuts oil production by 1M barrels/day starting May',
+    source: 'FT', time: '4h ago', impact: 'mixed',
+    summary: 'Oil price surge benefits energy sector but raises input costs across industrials, airlines, and consumer goods.',
+    affected: ['XOM','CVX','COP','OXY','XLE','BA','GE']
+  },
+  {
+    headline: 'AI chip export restrictions tightened — new rules target advanced GPU exports to China',
+    source: 'WSJ', time: '5h ago', impact: 'bear',
+    summary: 'Restrictions directly impact NVIDIA, AMD data center revenue from China. Short-term headwind for semis.',
+    affected: ['NVDA','AMD','INTC','AVGO','ASML','TSM']
+  },
+  {
+    headline: 'Apple granted regulatory approval for iPhone sales in India — major new market',
+    source: 'Bloomberg', time: '6h ago', impact: 'bull',
+    summary: 'India expansion unlocks 1.4B consumer market. Positive for Apple suppliers and broader consumer tech.',
+    affected: ['AAPL','QCOM','AVGO','TSM','MU']
+  },
+  {
+    headline: 'Europe enters recession — GDP contracts 0.3% for second consecutive quarter',
+    source: 'Reuters', time: '7h ago', impact: 'bear',
+    summary: 'European weakness weighs on multinationals with heavy EU exposure. USD strengthens, pressuring emerging markets.',
+    affected: ['GOOGL','META','MSFT','ASML','NVO','GLD']
+  },
+  {
+    headline: 'US-China trade tensions escalate — new 25% tariffs proposed on tech goods',
+    source: 'AP', time: '8h ago', impact: 'bear',
+    summary: 'Tariff escalation hits tech supply chains. Consumer electronics prices likely to rise. Domestic US manufacturers may benefit.',
+    affected: ['AAPL','NVDA','AMD','TSLA','AMZN','BABA']
+  },
+  {
+    headline: 'GLP-1 weight loss drug market projected to reach $150B by 2030 — Novo, Lilly surge',
+    source: 'Barrons', time: '9h ago', impact: 'bull',
+    summary: 'Obesity drug boom accelerates. Eli Lilly and Novo Nordisk are primary beneficiaries. Food and beverage companies face secular headwind.',
+    affected: ['LLY','NVO','MRNA','PFE','ABBV']
+  },
+];
+
+async function loadGlobalNews() {
+  const container = document.getElementById('globalNewsContent');
+
+  if (!_offlineMode) {
+    const prompt = `Generate 6 realistic global macro news items that would affect stock markets today (April 2026).
+Return a JSON array. Each object: { headline (string), source (string), time (string like "2h ago"), impact ("bull"|"bear"|"mixed"), summary (string, 1-2 sentences about which stocks/sectors are affected and why), affected (array of 4-6 real stock ticker symbols) }.
+Return ONLY valid JSON array, no markdown fences.`;
+
+    const result = await callClaude(prompt, 12000);
+    if (result.ok) {
+      try {
+        const news = JSON.parse(result.text.replace(/```json|```/g,'').trim());
+        renderGlobalNews(news, false);
+        return;
+      } catch(_) {}
+    }
+  }
+  renderGlobalNews(GLOBAL_NEWS_FALLBACK, true);
+}
+
+function renderGlobalNews(newsItems, isOffline) {
+  const badge = isOffline
+    ? `<span style="font-size:0.55rem;padding:2px 6px;border-radius:10px;background:rgba(245,166,35,0.12);color:var(--yellow);border:1px solid rgba(245,166,35,0.3)">⚡ Local Data</span>`
+    : `<span style="font-size:0.55rem;padding:2px 6px;border-radius:10px;background:rgba(179,136,214,0.12);color:var(--lavender);border:1px solid rgba(179,136,214,0.3)">🤖 AI Generated</span>`;
+
+  document.getElementById('globalNewsPanel').querySelector('.panel-title').innerHTML =
+    `🌍 Global News & Market Impact <span style="margin-left:4px">${badge}</span>`;
+
+  const container = document.getElementById('globalNewsContent');
+  container.innerHTML = `<div class="gnews-grid">` +
+    newsItems.slice(0,6).map(n => {
+      const impactClass = n.impact==='bull'?'impact-bull':n.impact==='bear'?'impact-bear':'impact-mixed';
+      const impactLabel = n.impact==='bull'?'📈 Bullish':n.impact==='bear'?'📉 Bearish':'⚖️ Mixed';
+      const chips = (n.affected||[]).map(sym =>
+        `<span class="sym-chip" onclick="jumpToStock('${sym}')">${sym}</span>`
+      ).join('');
+      return `<div class="gnews-card">
+        <div class="gnews-impact ${impactClass}">${impactLabel}</div>
+        <div class="gnews-headline">${n.headline}</div>
+        <div class="gnews-meta">${n.source} · ${n.time}</div>
+        <div style="font-size:0.67rem;color:var(--muted2);line-height:1.5;margin-bottom:6px">${n.summary||''}</div>
+        <div class="gnews-affected">Affects: ${chips}</div>
+      </div>`;
+    }).join('') + `</div>
+    <div style="margin-top:10px;text-align:right">
+      <button onclick="loadGlobalNews()" style="padding:6px 14px;background:var(--surface2);border:1.5px solid var(--border2);border-radius:10px;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:0.65rem;cursor:pointer;transition:all 0.15s" onmouseover="this.style.borderColor='var(--pink)'" onmouseout="this.style.borderColor='var(--border2)'">✿ Refresh News</button>
+    </div>`;
+}
+
+function jumpToStock(sym) {
+  const s = STOCKS.find(x => x.sym === sym);
+  if (s) selectStock(s);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 </script>
 
 </body>
