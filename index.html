@@ -574,6 +574,93 @@ const ALL=[
   {sym:'WFC',name:'Wells Fargo',sector:'Finance',price:57.40,chg:0.22,signal:'watch'},
   {sym:'COP',name:'ConocoPhillips',sector:'Energy',price:118.40,chg:0.55,signal:'watch'},
   {sym:'RTX',name:'RTX Corporation',sector:'Defense',price:98.40,chg:0.32,signal:'watch'},
+  // Crypto/Bitcoin plays
+  {sym:'MSTR',name:'MicroStrategy Inc',sector:'Crypto',price:340.20,chg:3.40,signal:'buy'},
+  {sym:'RIOT',name:'Riot Platforms Inc',sector:'Crypto',price:8.20,chg:2.10,signal:'buy'},
+  {sym:'MARA',name:'Marathon Digital Holdings',sector:'Crypto',price:14.30,chg:2.80,signal:'buy'},
+  {sym:'CLSK',name:'CleanSpark Inc',sector:'Crypto',price:9.40,chg:1.90,signal:'buy'},
+  {sym:'HUT',name:'Hut 8 Corp',sector:'Crypto',price:12.10,chg:3.20,signal:'buy'},
+  {sym:'CORZ',name:'Core Scientific Inc',sector:'Crypto',price:11.40,chg:2.60,signal:'buy'},
+  {sym:'CIFR',name:'Cipher Mining Inc',sector:'Crypto',price:4.20,chg:1.80,signal:'watch'},
+  // EV & Clean Energy
+  {sym:'RIVN',name:'Rivian Automotive',sector:'EV',price:12.40,chg:-1.20,signal:'sell'},
+  {sym:'LCID',name:'Lucid Group Inc',sector:'EV',price:2.80,chg:-0.90,signal:'sell'},
+  {sym:'NIO',name:'NIO Inc',sector:'EV',price:4.20,chg:-1.40,signal:'sell'},
+  {sym:'LI',name:'Li Auto Inc',sector:'EV',price:22.40,chg:1.20,signal:'watch'},
+  {sym:'XPEV',name:'XPeng Inc',sector:'EV',price:9.40,chg:0.80,signal:'watch'},
+  {sym:'JOBY',name:'Joby Aviation Inc',sector:'EV',price:6.80,chg:2.10,signal:'buy'},
+  {sym:'BLNK',name:'Blink Charging Co',sector:'EV',price:2.40,chg:-2.10,signal:'sell'},
+  // Fintech & BNPL
+  {sym:'SOFI',name:'SoFi Technologies',sector:'Fintech',price:12.40,chg:2.10,signal:'buy'},
+  {sym:'AFRM',name:'Affirm Holdings',sector:'Fintech',price:38.40,chg:1.80,signal:'buy'},
+  {sym:'UPST',name:'Upstart Holdings',sector:'Fintech',price:42.30,chg:3.20,signal:'buy'},
+  {sym:'SEZZLE',name:'Sezzle Inc',sector:'Fintech',price:8.20,chg:1.40,signal:'watch'},
+  {sym:'AAON',name:'AAON Inc',sector:'Industrial',price:82.40,chg:0.44,signal:'watch'},
+  // Meme & Reddit stocks
+  {sym:'GME',name:'GameStop Corp',sector:'Retail',price:22.40,chg:-0.80,signal:'watch'},
+  {sym:'AMC',name:'AMC Entertainment',sector:'Media',price:3.20,chg:-1.40,signal:'sell'},
+  {sym:'BB',name:'BlackBerry Ltd',sector:'Tech',price:2.80,chg:-0.60,signal:'sell'},
+  {sym:'BBBY',name:'Beyond Inc',sector:'Retail',price:4.20,chg:0.90,signal:'watch'},
+  {sym:'CLOV',name:'Clover Health Investments',sector:'Health',price:1.80,chg:1.20,signal:'watch'},
+  // Space & Defense
+  {sym:'SPCE',name:'Virgin Galactic Holdings',sector:'Space',price:1.20,chg:-3.40,signal:'sell'},
+  {sym:'RKLB',name:'Rocket Lab USA',sector:'Space',price:12.40,chg:2.80,signal:'buy'},
+  {sym:'ASTS',name:'AST SpaceMobile',sector:'Space',price:18.40,chg:4.20,signal:'buy'},
+  {sym:'LUNR',name:'Intuitive Machines',sector:'Space',price:6.40,chg:3.10,signal:'buy'},
+  {sym:'KTOS',name:'Kratos Defense & Security',sector:'Defense',price:28.40,chg:1.20,signal:'buy'},
+  {sym:'AXON',name:'Axon Enterprise Inc',sector:'Defense',price:342.40,chg:1.80,signal:'buy'},
+  // AI & Tech emerging
+  {sym:'SOUN',name:'SoundHound AI Inc',sector:'AI',price:8.40,chg:4.20,signal:'buy'},
+  {sym:'BBAI',name:'BigBear.ai Holdings',sector:'AI',price:2.80,chg:3.10,signal:'buy'},
+  {sym:'GFAI',name:'Guardforce AI Co',sector:'AI',price:1.40,chg:2.40,signal:'watch'},
+  {sym:'MSAI',name:'MultiSensor AI Holdings',sector:'AI',price:3.20,chg:1.80,signal:'watch'},
+  {sym:'IONQ',name:'IonQ Inc',sector:'Quantum',price:28.40,chg:3.40,signal:'buy'},
+  {sym:'QUBT',name:'Quantum Computing Inc',sector:'Quantum',price:8.20,chg:4.10,signal:'buy'},
+  {sym:'RGTI',name:'Rigetti Computing Inc',sector:'Quantum',price:9.40,chg:5.20,signal:'buy'},
+  // Biotech
+  {sym:'NVAX',name:'Novavax Inc',sector:'Biotech',price:6.40,chg:-1.20,signal:'sell'},
+  {sym:'BNTX',name:'BioNTech SE',sector:'Biotech',price:82.40,chg:0.44,signal:'watch'},
+  {sym:'REGN',name:'Regeneron Pharmaceuticals',sector:'Biotech',price:712.40,chg:0.38,signal:'buy'},
+  {sym:'VRTX',name:'Vertex Pharmaceuticals',sector:'Biotech',price:412.40,chg:0.92,signal:'buy'},
+  {sym:'CRSP',name:'CRISPR Therapeutics',sector:'Biotech',price:38.40,chg:1.40,signal:'watch'},
+  {sym:'EDIT',name:'Editas Medicine Inc',sector:'Biotech',price:4.20,chg:-0.80,signal:'sell'},
+  {sym:'BEAM',name:'Beam Therapeutics',sector:'Biotech',price:14.20,chg:1.20,signal:'watch'},
+  // More ETFs
+  {sym:'BITX',name:'2x Bitcoin Strategy ETF',sector:'ETF',price:28.40,chg:4.20,signal:'buy'},
+  {sym:'BITO',name:'ProShares Bitcoin ETF',sector:'ETF',price:18.40,chg:2.80,signal:'buy'},
+  {sym:'IBIT',name:'iShares Bitcoin Trust',sector:'ETF',price:38.40,chg:2.40,signal:'buy'},
+  {sym:'FBTC',name:'Fidelity Wise Origin Bitcoin',sector:'ETF',price:42.40,chg:2.20,signal:'buy'},
+  {sym:'GBTC',name:'Grayscale Bitcoin Trust',sector:'ETF',price:58.40,chg:2.10,signal:'buy'},
+  {sym:'FNGU',name:'MicroSectors FANG+',sector:'ETF',price:182.40,chg:2.80,signal:'buy'},
+  {sym:'SOXL',name:'Direxion Semi Bull 3x',sector:'ETF',price:18.40,chg:4.20,signal:'buy'},
+  {sym:'SOXS',name:'Direxion Semi Bear 3x',sector:'ETF',price:8.40,chg:-3.20,signal:'sell'},
+  {sym:'LABU',name:'Direxion Biotech Bull 3x',sector:'ETF',price:12.40,chg:2.10,signal:'watch'},
+  {sym:'BOIL',name:'ProShares Ultra DJ-AIG Natgas',sector:'ETF',price:8.20,chg:1.40,signal:'watch'},
+  // Consumer & Retail
+  {sym:'DUOL',name:'Duolingo Inc',sector:'Tech',price:248.40,chg:2.80,signal:'buy'},
+  {sym:'RBLX',name:'Roblox Corporation',sector:'Tech',price:38.40,chg:1.20,signal:'watch'},
+  {sym:'U',name:'Unity Software Inc',sector:'Tech',price:18.40,chg:-1.20,signal:'sell'},
+  {sym:'CELH',name:'Celsius Holdings Inc',sector:'Consumer',price:28.40,chg:1.80,signal:'buy'},
+  {sym:'BROS',name:'Dutch Bros Inc',sector:'Consumer',price:58.40,chg:2.10,signal:'buy'},
+  {sym:'CAVA',name:'CAVA Group Inc',sector:'Consumer',price:82.40,chg:3.20,signal:'buy'},
+  {sym:'WING',name:'Wingstop Inc',sector:'Consumer',price:242.40,chg:1.40,signal:'buy'},
+  {sym:'TXRH',name:'Texas Roadhouse Inc',sector:'Consumer',price:178.40,chg:0.88,signal:'watch'},
+  {sym:'CMG',name:'Chipotle Mexican Grill',sector:'Consumer',price:52.40,chg:0.72,signal:'watch'},
+  {sym:'DKNG',name:'DraftKings Inc',sector:'Gaming',price:38.40,chg:2.10,signal:'buy'},
+  {sym:'PENN',name:'PENN Entertainment',sector:'Gaming',price:14.20,chg:-0.80,signal:'sell'},
+  {sym:'MGM',name:'MGM Resorts International',sector:'Gaming',price:32.40,chg:0.44,signal:'watch'},
+  {sym:'LVS',name:'Las Vegas Sands Corp',sector:'Gaming',price:42.40,chg:0.38,signal:'watch'},
+  // Healthcare devices
+  {sym:'PODD',name:'Insulet Corporation',sector:'Health',price:178.40,chg:1.20,signal:'buy'},
+  {sym:'TDOC',name:'Teladoc Health Inc',sector:'Health',price:8.40,chg:-1.80,signal:'sell'},
+  {sym:'HIMS',name:'Hims & Hers Health',sector:'Health',price:18.40,chg:3.20,signal:'buy'},
+  {sym:'ACCD',name:'Accolade Inc',sector:'Health',price:4.20,chg:1.10,signal:'watch'},
+  // Real Estate & Infrastructure
+  {sym:'AMT',name:'American Tower Corp',sector:'REIT',price:182.40,chg:0.38,signal:'watch'},
+  {sym:'PLD',name:'Prologis Inc',sector:'REIT',price:112.40,chg:0.22,signal:'watch'},
+  {sym:'CCI',name:'Crown Castle Inc',sector:'REIT',price:98.40,chg:-0.44,signal:'watch'},
+  {sym:'EQIX',name:'Equinix Inc',sector:'REIT',price:782.40,chg:0.88,signal:'buy'},
+  {sym:'O',name:'Realty Income Corp',sector:'REIT',price:52.40,chg:0.18,signal:'watch'},
 ];
 
 // =====================================================================
@@ -711,12 +798,14 @@ function renderSigBox(s,td){
   const conf=tech?Math.round(tech.confidence):(s.signal==='buy'?78:s.signal==='sell'?74:55);
   const rsi=tech?.rsi?`RSI ${tech.rsi}`:'RSI —';
   const macd=tech?.macd!=null?`MACD ${tech.macd>0?'+':''}${tech.macd.toFixed(2)}`:'MACD —';
-  const ema=tech?`EMA20 $${tech.ema20}`:'';
+  const tfLabel=tech?.tfLabel||getCurrentTfLabel();
+  const ctx=tech?.ctx||getSignalContext(tfLabel,curMode);
+  const tfBadge=`<span style="font-size:.48rem;padding:1px 5px;border-radius:5px;background:rgba(179,136,214,.12);color:var(--lavender);border:1px solid rgba(179,136,214,.25);margin-left:5px">${tfLabel} ${curMode==='swing'?'Swing':'Day'}</span>`;
   const loading=!tech?'<span style="font-size:.5rem;color:var(--muted);margin-left:6px">calculating…</span>':'';
   document.getElementById('hSigBox').innerHTML=`<div class="sig-box ${s.signal}" style="display:inline-flex;gap:10px;align-items:center;">
     <div style="font-size:1.2rem">${icon}</div>
     <div>
-      <div class="sig-lbl">Technical Signal${loading}</div>
+      <div class="sig-lbl">Technical Signal${tfBadge}${loading}</div>
       <div class="sig-val" style="color:${col}">${lbl}</div>
       <div class="sig-conf" style="color:${col}">${conf}% confidence</div>
     </div>
@@ -874,19 +963,40 @@ async function aiSearch(){
   // 3. Claude AI fallback
   el.innerHTML='<div class="loading"><div class="spin"></div>Asking AI…</div>';
   if(!_off){
-    const r=await claude(`User searches for stock: "${q}". Return JSON array of up to 5 real US stocks matching this query. Each object: {sym,name,sector,price,chg,signal}. ONLY valid JSON array.`);
+    const r=await claude(`User searches for stock: "${q}". Return JSON array of up to 8 real US stocks matching this. Include exact match for "${q.toUpperCase()}" if it's a valid ticker. Each: {sym,name,sector,price,chg,signal}. ONLY valid JSON array, no markdown.`);
     if(r.ok){try{
       const found=JSON.parse(r.text.replace(/```json|```/g,'').trim());
       found.forEach(s=>{if(!STOCKS.find(x=>x.sym===s.sym))STOCKS.push(s);});
-      el.innerHTML=`<div style="font-size:.56rem;color:var(--muted2);margin-bottom:6px">AI results for "${q}"</div>`+found.map(moCard).join('');
+      el.innerHTML=`<div style="font-size:.56rem;color:var(--muted2);margin-bottom:6px">🤖 AI results for "${q}"</div>`+found.map(moCard).join('');
+      // Fetch real price for each found stock
+      found.forEach(s=>setTimeout(()=>updateSignalForStock(s.sym),500));
       return;
     }catch(e){}}
+  }
+
+  // 4. Last resort — create stub from ticker and fetch live data
+  const upperQ=q.toUpperCase().trim();
+  if(/^[A-Z]{1,5}$/.test(upperQ)){
+    el.innerHTML=`<div style="padding:10px;text-align:center;color:var(--muted2);font-size:.66rem">
+      <div class="loading"><div class="spin"></div>Fetching ${upperQ} live data…</div>
+    </div>`;
+    // Create a stub and fetch real data
+    const stub={sym:upperQ,name:upperQ,sector:'US Equity',price:10,chg:0,signal:'watch'};
+    if(!STOCKS.find(x=>x.sym===upperQ))STOCKS.push(stub);
+    const td=await fetchTechnicals(upperQ);
+    if(td&&td.price>0){
+      const computed=computeSignal(td);
+      TECH_DATA[upperQ]=computed;
+      stub.price=td.price;stub.chg=parseFloat(td.chgPct.toFixed(2));stub.signal=computed.signal;
+      el.innerHTML=`<div style="font-size:.56rem;color:var(--green);margin-bottom:6px">✓ Found live data for ${upperQ}</div>`+[stub].map(moCard).join('');
+      return;
+    }
   }
 
   el.innerHTML=`<div style="padding:18px;text-align:center;color:var(--muted2);font-size:.68rem">
     <div style="font-size:1.1rem;margin-bottom:6px">🔍</div>
     No results for "<b>${q}</b>"<br>
-    <span style="font-size:.6rem">Try exact ticker: RIVN, SOFI, HOOD, GME…</span>
+    <span style="font-size:.6rem">Try exact ticker: MSTR, RIVN, SOFI, GME, IBIT…</span>
   </div>`;
 }
 function closeMo(id,e){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('show');}
@@ -1053,6 +1163,26 @@ function selectTf(idx){
   curTfIdx=idx;
   renderTfBtns();
   loadTVChart(cur.sym);
+  // Recalculate signal + panels for the new timeframe
+  const tf=getCurrentTfLabel();
+  showSignalLoading();
+  updateSignalForStock(cur.sym, curMode, tf);
+}
+
+function showSignalLoading(){
+  const box=document.getElementById('hSigBox');
+  if(box){
+    const tf=getCurrentTfLabel();
+    const m=curMode;
+    box.innerHTML=`<div class="sig-box watch" style="display:inline-flex;gap:8px;align-items:center">
+      <div class="spin" style="width:14px;height:14px;border-width:2px"></div>
+      <div>
+        <div class="sig-lbl">Recalculating for ${tf} ${m==='swing'?'Swing':'Day'} signal…</div>
+        <div class="sig-val" style="color:var(--muted2)">Fetching ${tf} candles</div>
+        <div class="sig-conf" style="color:var(--muted)">Please wait…</div>
+      </div>
+    </div>`;
+  }
 }
 
 function setTf(btn){} // legacy no-op
@@ -1522,7 +1652,13 @@ const REAL_PRICES={
   BA:144.40,CAT:352.20,GE:171.30,LMT:462.20,BABA:104.30,
   PDD:115.30,DIS:94.40,NFLX:991.30,PARA:11.40,T:23.80,
   VZ:39.30,TMUS:221.40,'BRK.B':418.30,WFC:64.40,COP:111.40,RTX:124.40,
-  RTX:124.40,SPGI:452.30
+  RTX:124.40,SPGI:452.30,
+  MSTR:340.20,RIOT:8.20,MARA:14.30,CLSK:9.40,HUT:12.10,CORZ:11.40,
+  RIVN:12.40,LCID:2.80,NIO:4.20,JOBY:6.80,SOFI:12.40,AFRM:38.40,
+  UPST:42.30,GME:22.40,AMC:3.20,RKLB:12.40,ASTS:18.40,SOUN:8.40,
+  IONQ:28.40,QUBT:8.20,RGTI:9.40,DUOL:248.40,RBLX:38.40,CELH:28.40,
+  BROS:58.40,CAVA:82.40,DKNG:38.40,HIMS:18.40,IBIT:38.40,BITO:18.40,
+  GBTC:58.40,SOXL:18.40,FNGU:182.40,EQIX:782.40,CMG:52.40,AXON:342.40
 };
 // Seed all stocks with real prices on load
 function seedRealPrices(){
@@ -1643,9 +1779,59 @@ function updateExternalLinks(sym){
 // Stores per-symbol technical data fetched from Yahoo
 const TECH_DATA={};
 
-async function fetchTechnicals(sym){
-  // Yahoo v8 chart gives us OHLCV history for real indicator calculation
-  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=3mo&indicators=adjclose`;
+// Map TF label → Yahoo interval + range
+function tfToYahoo(tfLabel){
+  const map={
+    '1M': {interval:'1m', range:'1d'},
+    '2M': {interval:'2m', range:'1d'},
+    '3M': {interval:'5m', range:'1d'},
+    '5M': {interval:'5m', range:'5d'},
+    '10M':{interval:'15m',range:'5d'},
+    '15M':{interval:'15m',range:'5d'},
+    '30M':{interval:'30m',range:'1mo'},
+    '1H': {interval:'60m',range:'1mo'},
+    '2H': {interval:'60m',range:'3mo'},
+    '4H': {interval:'1d', range:'6mo'},
+    '1D': {interval:'1d', range:'1y'},
+    '2D': {interval:'1wk',range:'2y'},
+    '1W': {interval:'1wk',range:'5y'},
+    '1M_swing':{interval:'1mo',range:'5y'},
+  };
+  return map[tfLabel]||{interval:'1d',range:'3mo'};
+}
+
+function getCurrentTfLabel(){
+  const intervals=MODES[curMode].intervals;
+  return intervals[curTfIdx]?.lbl||'1D';
+}
+
+function getTfDisplayName(tfLabel, mode){
+  const names={
+    '1M':'1-Min scalp','2M':'2-Min scalp','3M':'3-Min','5M':'5-Min intraday',
+    '10M':'10-Min','15M':'15-Min swing','30M':'30-Min','1H':'1-Hour',
+    '2H':'2-Hour','4H':'4-Hour','1D':'Daily','2D':'2-Day','1W':'Weekly','1M_swing':'Monthly'
+  };
+  return names[tfLabel]||tfLabel;
+}
+
+function getSignalContext(tfLabel, mode){
+  // Returns what indicators matter most for this TF
+  if(mode==='day'){
+    if(['1M','2M','3M'].includes(tfLabel)) return{emaPeriods:[9,21],rsiPeriod:9,bbPeriod:20,label:'Scalp',holdTime:'1–15 min',keyLevel:'VWAP'};
+    if(['5M','10M'].includes(tfLabel)) return{emaPeriods:[9,21],rsiPeriod:14,bbPeriod:20,label:'Intraday',holdTime:'15–60 min',keyLevel:'VWAP + ORB'};
+    return{emaPeriods:[9,21],rsiPeriod:14,bbPeriod:20,label:'Intraday',holdTime:'30–90 min',keyLevel:'VWAP'};
+  } else {
+    if(['1H','2H'].includes(tfLabel)) return{emaPeriods:[20,50],rsiPeriod:14,bbPeriod:20,label:'Short Swing',holdTime:'1–3 days',keyLevel:'EMA 20'};
+    if(tfLabel==='4H') return{emaPeriods:[20,50],rsiPeriod:14,bbPeriod:20,label:'Swing',holdTime:'2–5 days',keyLevel:'EMA 50'};
+    if(tfLabel==='1D') return{emaPeriods:[50,200],rsiPeriod:14,bbPeriod:20,label:'Position',holdTime:'1–4 weeks',keyLevel:'EMA 50/200'};
+    return{emaPeriods:[50,200],rsiPeriod:14,bbPeriod:20,label:'Long Swing',holdTime:'weeks–months',keyLevel:'200 EMA'};
+  }
+}
+
+async function fetchTechnicals(sym, tfLabel){
+  const tf=tfLabel||getCurrentTfLabel();
+  const {interval,range}=tfToYahoo(tf);
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${interval}&range=${range}&indicators=adjclose`;
   const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
   try{
     const res=await fetch(proxy,{signal:AbortSignal.timeout(9000)});
@@ -1659,14 +1845,15 @@ async function fetchTechnicals(sym){
     const lows=result.indicators?.quote?.[0]?.low||[];
     const vols=result.indicators?.quote?.[0]?.volume||[];
     const opens=result.indicators?.quote?.[0]?.open||[];
-    if(closes.length<20)return null;
-    // Filter nulls
-    const cl=closes.filter(Boolean);
+    const minBars=tf==='1D'||tf==='1W'?10:15;
+    const validCloses=closes.filter(Boolean);
+    if(validCloses.length<minBars)return null;
+    const cl=validCloses;
     const hi=highs.filter(Boolean);
     const lo=lows.filter(Boolean);
     const vo=vols.filter(Boolean);
     return{
-      closes:cl, highs:hi, lows:lo, volumes:vo, opens,
+      closes:cl,highs:hi,lows:lo,volumes:vo,opens,
       price:meta.regularMarketPrice||cl[cl.length-1],
       prevClose:meta.chartPreviousClose||cl[cl.length-2],
       chgPct:meta.regularMarketChangePercent||0,
@@ -1675,7 +1862,7 @@ async function fetchTechnicals(sym){
       fiftyTwoWeekHigh:meta.fiftyTwoWeekHigh,
       fiftyTwoWeekLow:meta.fiftyTwoWeekLow,
       marketCap:meta.marketCap,
-      sym
+      tfLabel:tf,interval,range,sym
     };
   }catch(e){return null;}
 }
@@ -1730,88 +1917,115 @@ function calcVolumeSignal(vols){
   return((last-avg)/avg*100);
 }
 
-function computeSignal(td){
-  // Real multi-factor technical signal
+function computeSignal(td, mode, tfLabel){
   const cl=td.closes, hi=td.highs, lo=td.lows, vo=td.volumes;
+  const tf=tfLabel||td.tfLabel||getCurrentTfLabel();
+  const m=mode||curMode;
+  const ctx=getSignalContext(tf,m);
   let score=0, factors=[];
-
-  // 1. Price vs 50-day EMA
-  const ema50=calcEMA(cl,Math.min(50,cl.length-1));
   const price=cl[cl.length-1];
-  if(price>ema50*1.01){score+=2;factors.push('Above 50 EMA ✓');}
-  else if(price<ema50*.99){score-=2;factors.push('Below 50 EMA ✗');}
 
-  // 2. Price vs 20-day EMA
-  const ema20=calcEMA(cl,Math.min(20,cl.length-1));
-  if(price>ema20){score+=1;factors.push('Above 20 EMA ✓');}
-  else{score-=1;factors.push('Below 20 EMA ✗');}
+  // ── EMA signals (period depends on TF) ──────────────────────────────
+  const emaFast=calcEMA(cl,Math.min(ctx.emaPeriods[0],Math.floor(cl.length*.7)));
+  const emaSlow=calcEMA(cl,Math.min(ctx.emaPeriods[1],Math.floor(cl.length*.9)));
+  td[`ema${ctx.emaPeriods[0]}`]=parseFloat(emaFast.toFixed(2));
+  td[`ema${ctx.emaPeriods[1]}`]=parseFloat(emaSlow.toFixed(2));
+  // Fast EMA
+  if(price>emaFast*1.005){score+=2;factors.push(`Above EMA${ctx.emaPeriods[0]} ✓`);}
+  else if(price<emaFast*.995){score-=2;factors.push(`Below EMA${ctx.emaPeriods[0]} ✗`);}
+  // Slow EMA
+  if(price>emaSlow*1.005){score+=2;factors.push(`Above EMA${ctx.emaPeriods[1]} ✓ (${ctx.keyLevel})`);}
+  else if(price<emaSlow*.995){score-=2;factors.push(`Below EMA${ctx.emaPeriods[1]} ✗`);}
+  // EMA cross (fast > slow = bullish)
+  if(emaFast>emaSlow*1.002){score+=1;factors.push(`EMA${ctx.emaPeriods[0]}/${ctx.emaPeriods[1]} bullish cross ✓`);}
+  else if(emaFast<emaSlow*.998){score-=1;factors.push(`EMA${ctx.emaPeriods[0]}/${ctx.emaPeriods[1]} death cross ✗`);}
 
-  // 3. RSI
-  const rsi=calcRSI(cl,14);
+  // ── RSI (period adapts to TF) ─────────────────────────────────────────
+  const rsi=calcRSI(cl,ctx.rsiPeriod);
   td.rsi=parseFloat(rsi.toFixed(1));
-  if(rsi>55&&rsi<75){score+=2;factors.push(`RSI ${rsi.toFixed(0)} — bullish momentum`);}
-  else if(rsi>75){score-=1;factors.push(`RSI ${rsi.toFixed(0)} — overbought`);}
-  else if(rsi<35){score+=1;factors.push(`RSI ${rsi.toFixed(0)} — oversold bounce`);}
-  else if(rsi<45){score-=2;factors.push(`RSI ${rsi.toFixed(0)} — bearish`);}
+  const obLevel=m==='day'?70:65, osLevel=m==='day'?30:35;
+  if(rsi>55&&rsi<obLevel){score+=2;factors.push(`RSI ${rsi.toFixed(0)} — ${m==='day'?'bullish momentum':'uptrend confirmed'}`);}
+  else if(rsi>=obLevel){score-=(m==='day'?2:1);factors.push(`RSI ${rsi.toFixed(0)} — overbought ${m==='day'?'(fade signal)':'(watch for pullback)'}`);}
+  else if(rsi<osLevel){score+=(m==='swing'?2:1);factors.push(`RSI ${rsi.toFixed(0)} — oversold ${m==='swing'?'(swing entry zone)':'(bounce possible)'}`);}
+  else if(rsi<45){score-=2;factors.push(`RSI ${rsi.toFixed(0)} — bearish momentum`);}
 
-  // 4. MACD
+  // ── MACD ──────────────────────────────────────────────────────────────
   const macd=calcMACD(cl);
   td.macd=parseFloat(macd.toFixed(2));
-  if(macd>0){score+=2;factors.push('MACD positive ✓');}
-  else{score-=2;factors.push('MACD negative ✗');}
+  if(macd>0){score+=2;factors.push(`MACD +${macd.toFixed(2)} — bullish ✓`);}
+  else{score-=2;factors.push(`MACD ${macd.toFixed(2)} — bearish ✗`);}
 
-  // 5. Bollinger Band position
-  const bb=calcBBPosition(cl);
+  // ── Bollinger Bands ───────────────────────────────────────────────────
+  const bb=calcBBPosition(cl,ctx.bbPeriod);
   td.bbPct=parseFloat(bb.pct.toFixed(1));
-  td.bbUpper=bb.upper; td.bbLower=bb.lower; td.bbMid=bb.mid;
-  if(bb.pct>55&&bb.pct<85){score+=1;factors.push('BB upper zone — momentum');}
-  else if(bb.pct>85){score-=1;factors.push('BB overbought zone');}
-  else if(bb.pct<25){score+=1;factors.push('BB lower zone — potential bounce');}
-  else if(bb.pct<10){score-=1;factors.push('BB breakdown');}
-
-  // 6. Today's price change
-  if(td.chgPct>1.5){score+=2;factors.push(`+${td.chgPct.toFixed(1)}% today ✓`);}
-  else if(td.chgPct>0.3){score+=1;factors.push(`+${td.chgPct.toFixed(1)}% today`);}
-  else if(td.chgPct<-1.5){score-=2;factors.push(`${td.chgPct.toFixed(1)}% today ✗`);}
-  else if(td.chgPct<-0.3){score-=1;factors.push(`${td.chgPct.toFixed(1)}% today`);}
-
-  // 7. Volume confirmation
-  const volSig=calcVolumeSignal(vo);
-  td.volPct=parseFloat(volSig.toFixed(0));
-  if(volSig>30&&td.chgPct>0){score+=2;factors.push(`Vol +${volSig.toFixed(0)}% — institutional buying`);}
-  else if(volSig>30&&td.chgPct<0){score-=2;factors.push(`Vol +${volSig.toFixed(0)}% — heavy selling`);}
-  else if(volSig<-30){score-=1;factors.push('Low volume — weak move');}
-
-  // 8. 52-week position
-  if(td.fiftyTwoWeekHigh&&td.fiftyTwoWeekLow){
-    const range=td.fiftyTwoWeekHigh-td.fiftyTwoWeekLow;
-    const pos=(price-td.fiftyTwoWeekLow)/range*100;
-    td.ywkPos=parseFloat(pos.toFixed(0));
-    if(pos>80){score+=1;factors.push('Near 52-wk high — strong trend');}
-    else if(pos<20){score-=1;factors.push('Near 52-wk low — weakness');}
+  td.bbUpper=bb.upper;td.bbLower=bb.lower;td.bbMid=bb.mid;
+  if(m==='day'){
+    // Day trading: riding the upper band is momentum
+    if(bb.pct>60&&bb.pct<90){score+=1;factors.push('BB upper zone — momentum ✓');}
+    else if(bb.pct>=90){score-=1;factors.push('BB extreme — risk of reversal');}
+    else if(bb.pct<25&&bb.pct>10){score+=1;factors.push('BB lower — bounce watch');}
+    else if(bb.pct<=10){score-=1;factors.push('BB breakdown ✗');}
+  } else {
+    // Swing trading: mean reversion matters more
+    if(bb.pct>70){score-=1;factors.push('BB overbought — swing risk');}
+    else if(bb.pct<30){score+=2;factors.push('BB oversold — swing buy zone ✓');}
+    else if(bb.pct>45&&bb.pct<70){score+=1;factors.push('BB mid-upper — uptrend ✓');}
   }
 
-  td.score=score;
-  td.factors=factors;
-  td.ema20=parseFloat(ema20.toFixed(2));
-  td.ema50=parseFloat(ema50.toFixed(2));
+  // ── Price change (weighted by TF) ────────────────────────────────────
+  const chgWeight=m==='day'?1.5:1.0;
+  if(td.chgPct>1.5*chgWeight){score+=2;factors.push(`+${td.chgPct.toFixed(1)}% — strong ${m==='day'?'session':'period'} ✓`);}
+  else if(td.chgPct>0.3){score+=1;factors.push(`+${td.chgPct.toFixed(1)}% ${m==='day'?'today':'this period'}`);}
+  else if(td.chgPct<-1.5*chgWeight){score-=2;factors.push(`${td.chgPct.toFixed(1)}% — heavy selling ✗`);}
+  else if(td.chgPct<-0.3){score-=1;factors.push(`${td.chgPct.toFixed(1)}% ${m==='day'?'today':'this period'}`);}
 
-  // Signal thresholds
-  const maxScore=14;
-  const pct=(score/maxScore)*100;
-  td.confidence=Math.min(95,Math.max(35,Math.abs(pct)*0.6+40));
-  if(score>=4){td.signal='buy';td.signalLabel='STRONG BUY';}
-  else if(score>=2){td.signal='buy';td.signalLabel='BUY';}
-  else if(score<=-4){td.signal='sell';td.signalLabel='STRONG SELL';}
-  else if(score<=-2){td.signal='sell';td.signalLabel='SELL';}
+  // ── Volume ─────────────────────────────────────────────────────────────
+  const volSig=calcVolumeSignal(vo);
+  td.volPct=parseFloat(volSig.toFixed(0));
+  const volThresh=m==='day'?20:30;
+  if(volSig>volThresh&&td.chgPct>0){score+=2;factors.push(`Vol +${volSig.toFixed(0)}% — ${m==='day'?'buyers in control':'institutional accumulation'} ✓`);}
+  else if(volSig>volThresh&&td.chgPct<0){score-=2;factors.push(`Vol +${volSig.toFixed(0)}% — ${m==='day'?'sellers dominant':'distribution'} ✗`);}
+  else if(volSig<-volThresh){score-=1;factors.push('Low volume — weak conviction');}
+
+  // ── 52-week position (more relevant for swing) ──────────────────────
+  if(td.fiftyTwoWeekHigh&&td.fiftyTwoWeekLow){
+    const rng=td.fiftyTwoWeekHigh-td.fiftyTwoWeekLow;
+    const pos=(price-td.fiftyTwoWeekLow)/rng*100;
+    td.ywkPos=parseFloat(pos.toFixed(0));
+    if(m==='swing'){
+      if(pos>75){score+=2;factors.push('Near 52-wk high — strong uptrend ✓');}
+      else if(pos<25){score-=1;factors.push('Near 52-wk low — downtrend ✗');}
+    } else {
+      if(pos>80){score+=1;factors.push('At 52-wk highs — momentum ✓');}
+    }
+  }
+
+  td.score=score;td.factors=factors;
+  td.ema20=parseFloat(emaFast.toFixed(2));
+  td.ema50=parseFloat(emaSlow.toFixed(2));
+  td.ctx=ctx;td.tfLabel=tf;td.mode=m;
+
+  // Confidence calculation
+  const maxScore=16;
+  td.confidence=Math.min(94,Math.max(38,Math.abs(score)/maxScore*55+40));
+
+  // Signal — swing has wider neutral zone
+  const buyThresh=m==='swing'?3:2, sellThresh=m==='swing'?-3:-2;
+  const strongBuy=m==='swing'?6:4, strongSell=m==='swing'?-6:-4;
+  if(score>=strongBuy){td.signal='buy';td.signalLabel='STRONG BUY';}
+  else if(score>=buyThresh){td.signal='buy';td.signalLabel='BUY';}
+  else if(score<=strongSell){td.signal='sell';td.signalLabel='STRONG SELL';}
+  else if(score<=sellThresh){td.signal='sell';td.signalLabel='SELL';}
   else{td.signal='watch';td.signalLabel='NEUTRAL';}
   return td;
 }
 
-async function updateSignalForStock(sym){
-  const td=await fetchTechnicals(sym);
+async function updateSignalForStock(sym, mode, tfLabel){
+  const m=mode||curMode;
+  const tf=tfLabel||getCurrentTfLabel();
+  const td=await fetchTechnicals(sym,tf);
   if(!td)return;
-  const computed=computeSignal(td);
+  const computed=computeSignal(td,m,tf);
   TECH_DATA[sym]=computed;
   const s=STOCKS.find(x=>x.sym===sym);
   if(!s)return;
