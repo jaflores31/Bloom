@@ -406,7 +406,7 @@ MISSION CONTROL — $500 → $5000
         <div id="hSigBox" style="margin-top:7px;"></div>
       </div>
       <div style="text-align:right;">
-        <div class="h-price" id="hPrice">$892.54</div>
+        <div class="h-price" id="hPrice">$876.42</div>
         <div class="h-chg" id="hChg"></div>
       </div>
     </div>
@@ -430,12 +430,15 @@ MISSION CONTROL — $500 → $5000
     <button class="ai-btn" onclick="runAI()">✨ AI Analyze</button>
   </div>
   <!-- TRADINGVIEW CHART -->
-  <div id="tvContainer" style="height:340px;width:100%;position:relative;">
-    <div id="tvChart" style="height:100%;width:100%;"></div>
-    <div id="tvLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--surface);flex-direction:column;gap:8px;">
-      <div class="spin"></div>
-      <div style="font-size:.62rem;color:var(--muted2)">Loading TradingView chart…</div>
-    </div>
+  <div id="tvContainer" style="height:360px;width:100%;position:relative;">
+    <iframe id="tvChart" 
+      src="https://s.tradingview.com/widgetembed/?frameElementId=tvChart&symbol=NASDAQ:NVDA&interval=5&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=fff8fb&studies=VWAP%40tv-basicstudies%1FMASimple%40tv-basicstudies&theme=light&style=1&timezone=America%2FNew_York&withdateranges=1&showpopupbutton=1&locale=en"
+      style="width:100%;height:100%;border:none;" 
+      allowtransparency="true" 
+      scrolling="no"
+      allowfullscreen>
+    </iframe>
+    <div id="tvLoading" style="display:none"></div>
   </div>
   <!-- FALLBACK CANVAS (hidden, used when TV blocked) -->
   <canvas id="mainChart" style="display:none"></canvas>
@@ -2360,73 +2363,33 @@ function updateCurrentDisplay(){
 let tvWidget=null;
 let tvScriptLoaded=false;
 
-function loadTVChart(sym){
-  const container=document.getElementById('tvChart');
-  const loading=document.getElementById('tvLoading');
-  if(!container||!sym)return;
-  // Map TF label to TradingView interval
-  const getTVInterval=()=>{
-    try{
-      const tf=MODES[curMode]?.intervals[curTfIdx]?.lbl||'5M';
-      const map={'1M':'1','2M':'2','3M':'3','5M':'5','10M':'10','15M':'15','30M':'30',
-                 '1H':'60','2H':'120','4H':'240','1D':'D','2D':'3D','1W':'W'};
-      return map[tf]||'5';
-    }catch(e){return'5';}
-  };
-  // Show loading state
-  if(loading)loading.style.display='flex';
-  loadTVScript(()=>{
-    try{
-      container.innerHTML='';
-      if(loading)loading.style.display='none';
-      // Use the advanced chart widget (more compatible)
-      new TradingView.widget({
-        autosize:true,
-        symbol:`NASDAQ:${sym}`,
-        interval:getTVInterval(),
-        timezone:'America/New_York',
-        theme:'light',
-        style:'1',
-        locale:'en',
-        enable_publishing:false,
-        allow_symbol_change:true,
-        container_id:'tvChart',
-        hide_side_toolbar:true,
-        withdateranges:true,
-        save_image:false,
-        details:false,
-        hotlist:false,
-        calendar:false,
-        studies:curMode==='day'?
-          ['VWAP@tv-basicstudies','MASimple@tv-basicstudies']:
-          ['BB@tv-basicstudies','MASimple@tv-basicstudies'],
-        width:'100%',
-        height:340,
-      });
-    }catch(e){
-      console.warn('TradingView failed:',e);
-      showFallbackCanvas();
-    }
-  });
+function getTVInterval(){
+  try{
+    const tf=MODES[curMode]?.intervals[curTfIdx]?.lbl||'5M';
+    const map={'1M':'1','2M':'2','3M':'3','5M':'5','10M':'10','15M':'15','30M':'30',
+               '1H':'60','2H':'120','4H':'240','1D':'D','2D':'3D','1W':'W'};
+    return map[tf]||'5';
+  }catch(e){return'5';}
 }
 
-function loadTVScript(cb){
-  if(tvScriptLoaded){cb();return;}
-  // Try both CDN options
-  const s=document.createElement('script');
-  s.src='https://s3.tradingview.com/tv.js';
-  s.async=true;
-  s.onload=()=>{tvScriptLoaded=true;cb();};
-  s.onerror=()=>{
-    // Fallback to alternate URL
-    const s2=document.createElement('script');
-    s2.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-    s2.onload=()=>{tvScriptLoaded=true;cb();};
-    s2.onerror=()=>showFallbackCanvas();
-    document.head.appendChild(s2);
-  };
-  document.head.appendChild(s);
+function loadTVChart(sym){
+  if(!sym)return;
+  try{
+    const iframe=document.getElementById('tvChart');
+    if(!iframe)return;
+    // Detect correct exchange
+    const etfs=['SPY','QQQ','IWM','GLD','SLV','TLT','XLK','XLE','ARKK','TQQQ','SQQQ','SOXL','SOXS','IBIT','BITO','GBTC','FNGU','BITX'];
+    const nyse=['JPM','GS','BAC','V','MA','BRK.B','WFC','XOM','CVX','OXY','BA','CAT','LMT','WMT','COST','TGT','HD','MCD','NKE','DIS'];
+    const exchange=etfs.includes(sym)?'AMEX':nyse.includes(sym)?'NYSE':'NASDAQ';
+    const studies=curMode==='day'?
+      'VWAP%40tv-basicstudies%1FMASimple%40tv-basicstudies':
+      'BB%40tv-basicstudies%1FMASimple%40tv-basicstudies';
+    const url=`https://s.tradingview.com/widgetembed/?frameElementId=tvChart&symbol=${exchange}:${sym}&interval=${getTVInterval()}&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=fff8fb&studies=${studies}&theme=light&style=1&timezone=America%2FNew_York&withdateranges=1&showpopupbutton=1&locale=en`;
+    iframe.src=url;
+  }catch(e){console.warn('TV chart:',e);}
 }
+
+function loadTVScript(cb){cb();} // no longer needed — using iframe
 
 function showFallbackCanvas(){
   document.getElementById('tvContainer').style.display='none';
