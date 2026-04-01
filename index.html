@@ -539,17 +539,17 @@ border-radius: 20px; cursor: pointer; transition: all 0.2s; font-weight: 600;
 
 /* SEARCH STOCK BTN */
 .search-stock-btn {
-margin: 8px 12px 2px;
-padding: 8px 12px;
+display: block;
+margin: 8px 12px 4px;
+padding: 9px 12px;
 width: calc(100% - 24px);
-background: var(–surface2);
-border: 1.5px dashed var(–border2);
+background: linear-gradient(135deg, rgba(232,84,122,0.08), rgba(179,136,214,0.08));
+border: 1.5px solid var(–border2);
 border-radius: 12px;
-color: var(–accent); font-family: ‘DM Sans’, sans-serif; font-size: 0.72rem;
+color: var(–accent); font-family: ‘DM Sans’, ‘Helvetica Neue’, sans-serif; font-size: 0.72rem;
 font-weight: 600; cursor: pointer; transition: all 0.18s;
-text-align: left;
+text-align: left; letter-spacing: 0.01em;
 }
-.search-stock-btn:hover { background: rgba(232,84,122,0.06); border-color: var(–accent); }
 
 /* GLOBAL NEWS */
 .gnews-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
@@ -626,19 +626,22 @@ background: var(–surface2); transition: all 0.15s;
     <span class="logo-sub">Smart Trading · AI Powered</span>
   </div>
   <div class="ticker-bar" id="tickerBar"></div>
-  <div class="header-status">
-    <div class="pulse"></div>
-    <div style="font-size:0.7rem;color:var(--muted2)">LIVE · NYSE/NASDAQ</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button onclick="openSearchModal()" style="padding:7px 14px;background:linear-gradient(135deg,var(--accent),var(--pink));border:none;border-radius:20px;color:white;font-family:'DM Sans',sans-serif;font-size:0.72rem;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(232,84,122,0.3);white-space:nowrap">🔍 Search Stock</button>
+    <div class="header-status">
+      <div class="pulse"></div>
+      <div style="font-size:0.7rem;color:var(--muted2)">LIVE · NYSE/NASDAQ</div>
+    </div>
   </div>
 </header>
 
 <div class="app">
   <!-- SIDEBAR -->
   <aside>
+    <button class="search-stock-btn" onclick="openSearchModal()">🔍 Search Any Stock</button>
     <div class="search-wrap">
       <input type="text" id="sidebarSearch" placeholder="Filter watchlist..." oninput="filterWatchlist(this.value)" />
     </div>
-    <button class="search-stock-btn" onclick="openSearchModal()">🔍 Search Any Stock</button>
     <div class="watchlist-header">Watchlist</div>
     <div class="watchlist" id="watchlist"></div>
     <button class="scan-btn" onclick="runMarketScan()">✦ AI Market Scan</button>
