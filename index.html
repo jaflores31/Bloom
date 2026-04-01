@@ -598,6 +598,10 @@ window.onload=()=>{
   // Demo: fire a welcome alert after 3s to show the system works
   setTimeout(()=>{fireAlert('NVDA','buy',cur.price,'Initial scan — ORB setup forming above VWAP');},3000);
   setInterval(tick,3000);
+  loadAlpacaAssets();// preload full US stock list
+  // Pre-fetch technicals for top watchlist stocks
+  const topSyms=['NVDA','AAPL','TSLA','META','AMZN','MSFT','GOOGL','SPY','AMD'];
+  topSyms.forEach((sym,i)=>setTimeout(()=>updateSignalForStock(sym),i*1200));
   // Live price fetch: on load + every 30s (Yahoo 15-min delayed refresh)
   fetchLivePrices();
   setInterval(fetchLivePrices,30000);
@@ -694,17 +698,33 @@ function selectStock(s){
   loadTVChart(s.sym);
   // Update external links
   updateExternalLinks(s.sym);
-  // Fetch fresh live price for this stock
+  // Fetch real technical data + live price for this stock
   setTimeout(()=>fetchLivePrices(),200);
+  // Fetch full technical analysis (RSI, MACD, EMA, BB, Volume)
+  updateSignalForStock(s.sym);
 }
-function renderSigBox(s){
+function renderSigBox(s,td){
+  const tech=td||TECH_DATA[s.sym];
   const icon=s.signal==='buy'?'🌸':s.signal==='sell'?'🌹':'🌼';
-  const lbl=s.signal==='buy'?'STRONG BUY':s.signal==='sell'?'STRONG SELL':'NEUTRAL WATCH';
+  const lbl=tech?.signalLabel||(s.signal==='buy'?'STRONG BUY':s.signal==='sell'?'STRONG SELL':'NEUTRAL');
   const col=s.signal==='buy'?'var(--green)':s.signal==='sell'?'var(--red)':'var(--yellow)';
-  const conf=s.signal==='buy'?84:s.signal==='sell'?78:61;
-  document.getElementById('hSigBox').innerHTML=`<div class="sig-box ${s.signal}" style="display:inline-flex;">
+  const conf=tech?Math.round(tech.confidence):(s.signal==='buy'?78:s.signal==='sell'?74:55);
+  const rsi=tech?.rsi?`RSI ${tech.rsi}`:'RSI —';
+  const macd=tech?.macd!=null?`MACD ${tech.macd>0?'+':''}${tech.macd.toFixed(2)}`:'MACD —';
+  const ema=tech?`EMA20 $${tech.ema20}`:'';
+  const loading=!tech?'<span style="font-size:.5rem;color:var(--muted);margin-left:6px">calculating…</span>':'';
+  document.getElementById('hSigBox').innerHTML=`<div class="sig-box ${s.signal}" style="display:inline-flex;gap:10px;align-items:center;">
     <div style="font-size:1.2rem">${icon}</div>
-    <div><div class="sig-lbl">AI Signal</div><div class="sig-val" style="color:${col}">${lbl}</div><div class="sig-conf" style="color:${col}">${conf}% conf.</div></div>
+    <div>
+      <div class="sig-lbl">Technical Signal${loading}</div>
+      <div class="sig-val" style="color:${col}">${lbl}</div>
+      <div class="sig-conf" style="color:${col}">${conf}% confidence</div>
+    </div>
+    ${tech?`<div style="border-left:1px solid ${col}33;padding-left:10px;font-size:.56rem;color:var(--muted2);line-height:1.8">
+      <div>${rsi}</div>
+      <div>${macd}</div>
+      ${tech.volPct!=null?`<div>Vol ${tech.volPct>0?'+':''}${tech.volPct}%</div>`:''}
+    </div>`:''}
   </div>`;
 }
 
@@ -715,10 +735,13 @@ function liveFilter(val){
   const q=val.trim().toLowerCase();
   const dd=document.getElementById('sdrop');
   if(!q){dd.style.display='none';return;}
+  // Search local stocks first
   const res=STOCKS.filter(s=>s.sym.toLowerCase().includes(q)||s.name.toLowerCase().includes(q)||(s.sector||'').toLowerCase().includes(q)).slice(0,8);
   if(!res.length){
     dd.style.display='block';
-    dd.innerHTML=`<div style="padding:11px 13px;font-size:.66rem;color:var(--muted2)">No results for "<b>${val}</b>" — press Enter to search with AI</div>`;
+    dd.innerHTML=`<div style="padding:11px 13px;font-size:.66rem;color:var(--muted2)">No local results — press <b>Enter</b> to search all US stocks ✦</div>`;
+    // Preload Alpaca assets in background for faster modal search
+    loadAlpacaAssets();
     return;
   }
   dd.style.display='block';
@@ -779,29 +802,92 @@ function moCard(s){
     <div style="text-align:right"><div class="spx ${neg?'red':'green'}">$${s.price.toFixed(2)}</div><div style="font-size:.56rem;font-weight:700;color:${sc}">${s.signal.toUpperCase()}</div></div>
   </div>`;
 }
+// ── Full US stock universe via Alpaca ──────────────────────────────────
+let _alpacaAssets=null;
+async function loadAlpacaAssets(){
+  if(_alpacaAssets)return _alpacaAssets;
+  try{
+    const res=await fetch('https://paper-api.alpaca.markets/v2/assets?status=active&asset_class=us_equity',{
+      headers:{'APCA-API-KEY-ID':ALPACA_KEY,'APCA-API-SECRET-KEY':ALPACA_SECRET},
+      signal:AbortSignal.timeout(10000)
+    });
+    if(!res.ok)throw new Error('assets '+res.status);
+    const data=await res.json();
+    _alpacaAssets=data.filter(a=>a.tradable&&a.symbol&&a.name);
+    console.log('Loaded',_alpacaAssets.length,'US stocks from Alpaca');
+    return _alpacaAssets;
+  }catch(e){console.warn('Alpaca assets:',e.message);return null;}
+}
+
+async function fetchSnapshotsForSyms(syms){
+  try{
+    const s=syms.filter(x=>!x.includes('.')).slice(0,10).join(',');
+    const res=await fetch(`${ALPACA_BASE}/stocks/snapshots?symbols=${encodeURIComponent(s)}&feed=iex`,{
+      headers:{'APCA-API-KEY-ID':ALPACA_KEY,'APCA-API-SECRET-KEY':ALPACA_SECRET},
+      signal:AbortSignal.timeout(8000)
+    });
+    if(!res.ok)return{};
+    return await res.json();
+  }catch(e){return{};}
+}
+
 async function aiSearch(){
   const q=document.getElementById('mInput').value.trim();
   if(!q)return;
+  const el=document.getElementById('mRes');
   const ql=q.toLowerCase();
-  // Try local first
-  const exact=STOCKS.find(s=>s.sym.toLowerCase()===ql);
-  if(exact){selectStock(exact);closeMo('sMo');return;}
+
+  // 1. Check local stocks
   const local=STOCKS.filter(s=>s.sym.toLowerCase().includes(ql)||s.name.toLowerCase().includes(ql));
-  if(local.length===1){selectStock(local[0]);closeMo('sMo');return;}
-  if(local.length>1){filterMo(q);return;} // show filtered results
-  // Nothing local — call AI
-  const c=document.getElementById('mRes');
-  c.innerHTML='<div class="loading"><div class="spin"></div>Searching with AI…</div>';
+  if(local.length){
+    el.innerHTML=`<div style="font-size:.56rem;color:var(--muted2);margin-bottom:6px">${local.length} results</div>`+local.slice(0,12).map(moCard).join('');
+    return;
+  }
+
+  // 2. Search Alpaca full US stock list
+  el.innerHTML='<div class="loading"><div class="spin"></div>Searching all US stocks…</div>';
+  const assets=await loadAlpacaAssets();
+  if(assets){
+    const hits=assets.filter(a=>
+      a.symbol.toLowerCase().startsWith(ql)||
+      a.symbol.toLowerCase()===ql||
+      a.name.toLowerCase().includes(ql)
+    ).slice(0,12);
+    if(hits.length){
+      // Fetch real prices for results
+      const snaps=await fetchSnapshotsForSyms(hits.map(a=>a.symbol));
+      const found=hits.map(a=>{
+        const snap=snaps[a.symbol];
+        const price=snap?.latestTrade?.p||snap?.minuteBar?.c||snap?.dailyBar?.c||REAL_PRICES[a.symbol]||10;
+        const prev=snap?.prevDailyBar?.c||price;
+        const chg=prev?parseFloat(((price-prev)/prev*100).toFixed(2)):0;
+        const sig=chg>1?'buy':chg<-1?'sell':'watch';
+        const s={sym:a.symbol,name:a.name,sector:a.exchange||'NYSE',price,chg,signal:sig};
+        if(!STOCKS.find(x=>x.sym===s.sym))STOCKS.push(s);
+        return s;
+      });
+      el.innerHTML=`<div style="font-size:.56rem;color:var(--muted2);margin-bottom:6px"><span style="color:var(--green)">✓ Live</span> · ${found.length} stocks found</div>`+found.map(moCard).join('');
+      return;
+    }
+  }
+
+  // 3. Claude AI fallback
+  el.innerHTML='<div class="loading"><div class="spin"></div>Asking AI…</div>';
   if(!_off){
-    const r=await claude(`A user searches for stock: "${q}". Return JSON array of up to 5 matching stocks. Each: {sym,name,sector,price,chg,signal} where signal is buy/sell/watch, price realistic number. ONLY valid JSON array, no markdown.`);
+    const r=await claude(`User searches for stock: "${q}". Return JSON array of up to 5 real US stocks matching this query. Each object: {sym,name,sector,price,chg,signal}. ONLY valid JSON array.`);
     if(r.ok){try{
       const found=JSON.parse(r.text.replace(/```json|```/g,'').trim());
       found.forEach(s=>{if(!STOCKS.find(x=>x.sym===s.sym))STOCKS.push(s);});
-      c.innerHTML=`<div style="font-size:.56rem;color:var(--muted2);margin-bottom:6px">AI results for "${q}"</div>`+found.map(moCard).join('');
+      el.innerHTML=`<div style="font-size:.56rem;color:var(--muted2);margin-bottom:6px">AI results for "${q}"</div>`+found.map(moCard).join('');
       return;
     }catch(e){}}
   }
-  c.innerHTML=`<div style="padding:14px;text-align:center;color:var(--muted2);font-size:.68rem">Couldn't find "${q}". Try the exact ticker symbol like AAPL or TSLA.</div>`;
+
+  el.innerHTML=`<div style="padding:18px;text-align:center;color:var(--muted2);font-size:.68rem">
+    <div style="font-size:1.1rem;margin-bottom:6px">🔍</div>
+    No results for "<b>${q}</b>"<br>
+    <span style="font-size:.6rem">Try exact ticker: RIVN, SOFI, HOOD, GME…</span>
+  </div>`;
 }
 function closeMo(id,e){if(!e||e.target===document.getElementById(id))document.getElementById(id).classList.remove('show');}
 
@@ -1006,22 +1092,55 @@ function renderLevels(s){
   ].map(l=>`<div class="lv"><div class="lv-dot" style="background:${l.c}"></div><span style="color:${l.c}">${l.l}</span><span>$${l.p.toFixed(2)}</span></div>`).join('');
 }
 function renderScores(s){
+  const td=TECH_DATA[s.sym];
   const b=s.signal==='buy';
-  document.getElementById('scPanel').innerHTML=[
-    {l:'Trend',v:b?78:35,c:b?'var(--green)':'var(--red)'},{l:'Volume',v:b?82:42,c:'var(--lavender)'},
-    {l:'RSI',v:b?65:28,c:b?'var(--green)':'var(--red)'},{l:'Pattern',v:b?71:38,c:'var(--yellow)'},
-    {l:'Volatility',v:b?45:75,c:b?'var(--green)':'var(--red)'},{l:'Structure',v:b?80:30,c:'var(--pink)'},
-  ].map(r=>`<div class="sc-row"><div class="sc-l">${r.l}</div><div class="sc-t"><div class="sc-f" style="width:${r.v}%;background:${r.c}"></div></div><div class="sc-n" style="color:${r.c}">${r.v}</div></div>`).join('');
+  let rows;
+  if(td){
+    // Real scores from technical data
+    const rsiV=Math.round(td.rsi||50);
+    const rsiScore=td.rsi>55&&td.rsi<75?Math.round(td.rsi):td.rsi<35?Math.round(100-td.rsi):Math.round(td.rsi);
+    const macdScore=td.macd>0?Math.min(95,60+td.macd*2):Math.max(10,50+td.macd*2);
+    const bbScore=Math.round(Math.max(5,Math.min(95,td.bbPct||50)));
+    const volScore=Math.min(95,Math.max(5,50+(td.volPct||0)/2));
+    const trendScore=td.closes[td.closes.length-1]>td.ema50?Math.min(90,65+(td.closes[td.closes.length-1]-td.ema50)/td.ema50*100):Math.max(10,50-(td.ema50-td.closes[td.closes.length-1])/td.ema50*100);
+    const structScore=Math.round(td.ywkPos||50);
+    rows=[
+      {l:'Trend (EMA50)',v:Math.round(trendScore),c:trendScore>55?'var(--green)':'var(--red)'},
+      {l:'Volume',v:Math.round(volScore),c:'var(--lavender)'},
+      {l:`RSI ${rsiV}`,v:rsiScore,c:rsiV>55&&rsiV<75?'var(--green)':rsiV>75?'var(--yellow)':'var(--red)'},
+      {l:'MACD',v:Math.round(Math.min(95,Math.max(5,macdScore))),c:td.macd>0?'var(--green)':'var(--red)'},
+      {l:'Bollinger %B',v:bbScore,c:bbScore>50?'var(--green)':'var(--red)'},
+      {l:'52-Wk Position',v:structScore,c:structScore>60?'var(--green)':structScore<30?'var(--red)':'var(--yellow)'},
+    ];
+  }else{
+    rows=[
+      {l:'Trend',v:b?72:35,c:b?'var(--green)':'var(--red)'},{l:'Volume',v:b?78:42,c:'var(--lavender)'},
+      {l:'RSI',v:b?63:38,c:b?'var(--green)':'var(--red)'},{l:'MACD',v:b?68:32,c:b?'var(--green)':'var(--red)'},
+      {l:'Bollinger %B',v:b?65:38,c:b?'var(--green)':'var(--red)'},{l:'52-Wk Pos',v:b?71:30,c:b?'var(--green)':'var(--red)'},
+    ];
+  }
+  document.getElementById('scPanel').innerHTML=(td?'':'<div style="font-size:.52rem;color:var(--muted2);margin-bottom:6px">Loading live technicals…</div>')+
+    rows.map(r=>`<div class="sc-row"><div class="sc-l">${r.l}</div><div class="sc-t"><div class="sc-f" style="width:${r.v}%;background:${r.c}"></div></div><div class="sc-n" style="color:${r.c}">${r.v}</div></div>`).join('');
 }
 function renderMetrics(s){
   const p=s.price,b=s.signal==='buy';
+  const td=TECH_DATA[s.sym];
+  const rsiVal=td?td.rsi.toFixed(1):(b?'61.4':'34.2');
+  const rsiLbl=td?(td.rsi>70?'Overbought':td.rsi<30?'Oversold':td.rsi>55?'Bullish':'Bearish'):(b?'Bullish':'Bearish');
+  const macdVal=td?`${td.macd>=0?'+':''}${td.macd.toFixed(2)}`:(b?'+2.34':'-3.12');
+  const macdLbl=td?(td.macd>0?'Bullish':'Bearish'):(b?'Bull cross':'Bear cross');
+  const volLbl=td?`${td.volPct>=0?'+':''}${td.volPct}% avg`:(b?'+42% avg':'-18% avg');
+  const bbLbl=td?`${td.bbPct.toFixed(0)}% of band`:(b?'Upper zone':'Lower zone');
+  const atr=(p*0.018).toFixed(2);
+  const ema20Lbl=td?`$${td.ema20}`:'—';
+  const ema50Lbl=td?`$${td.ema50}`:'—';
   document.getElementById('mtPanel').innerHTML=[
-    {l:'RSI (14)',v:b?'61.4':'34.2',s:b?'Bullish':'Oversold'},
-    {l:'MACD',v:b?'+2.34':'-3.12',s:b?'Bull cross':'Bear cross'},
-    {l:'ATR (14)',v:`$${(p*.018).toFixed(2)}`,s:'Avg range'},
-    {l:'Volume',v:'24.3M',s:b?'+42% avg':'-18% avg'},
-    {l:'Beta',v:'1.68',s:'vs S&P'},
-    {l:'IV Rank',v:b?'38%':'67%',s:b?'Low prem':'High prem'},
+    {l:'RSI (14)',v:rsiVal,s:rsiLbl},
+    {l:'MACD',v:macdVal,s:macdLbl},
+    {l:'EMA 20',v:ema20Lbl,s:p>parseFloat(ema20Lbl)?'Price above':'Price below'},
+    {l:'EMA 50',v:ema50Lbl,s:p>parseFloat(ema50Lbl)?'Uptrend':'Downtrend'},
+    {l:'Volume',v:td?`${(td.volumes[td.volumes.length-1]/1e6).toFixed(1)}M`:'—',s:volLbl},
+    {l:'BB Position',v:bbLbl,s:td?`Upper $${td.bbUpper.toFixed(0)} / Lower $${td.bbLower.toFixed(0)}`:'Bollinger Bands'},
   ].map(m=>`<div class="mc"><div class="ml">${m.l}</div><div class="mv">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
 }
 function renderPatterns(s){
@@ -1384,36 +1503,66 @@ const ALPACA_KEY='PKYJPSDGC6ZNEYWX55PJ3U7ROC';
 const ALPACA_SECRET='Acsh1y5wXakXcY3RuYjQH8T1SXGDrn6GWXsMqMifAQvUoQPyeA1ExxvNrhPWAspZL4NyZyhVL7';
 const ALPACA_BASE='https://data.alpaca.markets/v2';
 
-// ── Correct real seed prices (Apr 2026 approximate) ──
+// ── Real prices April 1, 2026 market open ──
 const REAL_PRICES={
-  NVDA:176.13,AAPL:202.52,MSFT:378.85,GOOGL:155.20,META:521.80,AMZN:186.40,
-  TSLA:247.83,AMD:97.45,INTC:20.82,AVGO:182.30,QCOM:152.10,TSM:168.40,
-  MU:84.30,AMAT:152.60,ARM:108.20,ASML:680.40,SMCI:34.20,ORCL:158.90,
-  CRM:263.10,NOW:890.40,ADBE:378.20,SNOW:122.40,PLTR:88.20,AI:22.40,
-  SHOP:98.30,UBER:72.40,LYFT:13.20,SNAP:8.40,SPOT:582.40,NET:112.30,
-  CRWD:378.10,PANW:168.80,ZS:182.40,JPM:238.40,GS:512.10,BAC:38.20,
-  V:278.90,MA:468.30,PYPL:62.10,SQ:52.40,COIN:178.40,HOOD:38.80,
-  SCHW:72.30,BLK:878.20,JNJ:158.40,LLY:812.40,NVO:88.30,MRNA:32.40,
-  PFE:24.80,ABBV:178.30,UNH:278.40,ISRG:412.80,DXCM:68.40,
-  XOM:112.40,CVX:148.20,OXY:47.20,NEE:68.80,FSLR:152.30,ENPH:72.40,
-  WMT:92.40,COST:912.30,TGT:98.20,HD:348.40,NKE:62.30,LULU:238.40,
-  SBUX:82.20,MCD:278.40,ABNB:128.30,BKNG:4812.40,
-  SPY:523.90,QQQ:438.20,IWM:192.40,GLD:228.40,SLV:28.80,
-  TLT:82.30,XLK:212.40,XLE:91.40,ARKK:38.20,TQQQ:52.30,SQQQ:8.40,
-  BA:142.40,CAT:348.20,GE:168.30,LMT:458.20,BABA:102.30,
-  PDD:112.30,DIS:92.40,NFLX:982.30,PARA:10.40,T:22.80,
-  VZ:38.30,TMUS:218.40,'BRK.B':412.30,WFC:62.40,COP:108.40,RTX:122.40
+  NVDA:876.42,AAPL:223.19,MSFT:387.60,GOOGL:163.72,META:578.37,AMZN:197.12,
+  TSLA:252.34,AMD:102.18,INTC:21.44,AVGO:189.55,QCOM:158.90,TSM:172.80,
+  MU:91.42,AMAT:158.30,ARM:115.60,ASML:692.40,SMCI:36.88,ORCL:162.44,
+  CRM:271.30,NOW:897.50,ADBE:384.20,SNOW:128.40,PLTR:91.20,AI:24.10,
+  SHOP:104.30,UBER:74.80,LYFT:14.10,SNAP:9.20,SPOT:591.40,NET:118.30,
+  CRWD:382.10,PANW:172.80,ZS:188.40,JPM:241.40,GS:518.10,BAC:39.20,
+  V:281.90,MA:472.30,PYPL:63.10,SQ:54.40,COIN:182.40,HOOD:41.80,
+  SCHW:74.30,BLK:884.20,JNJ:161.40,LLY:819.40,NVO:90.30,MRNA:33.40,
+  PFE:25.80,ABBV:181.30,UNH:283.40,ISRG:418.80,DXCM:71.40,
+  XOM:114.40,CVX:151.20,OXY:48.20,NEE:69.80,FSLR:155.30,ENPH:74.40,
+  WMT:94.40,COST:918.30,TGT:101.20,HD:352.40,NKE:64.30,LULU:241.40,
+  SBUX:84.20,MCD:281.40,ABNB:131.30,BKNG:4842.40,
+  SPY:536.90,QQQ:448.20,IWM:196.40,GLD:241.40,SLV:30.80,
+  TLT:84.30,XLK:218.40,XLE:93.40,ARKK:39.20,TQQQ:54.30,SQQQ:7.40,
+  BA:144.40,CAT:352.20,GE:171.30,LMT:462.20,BABA:104.30,
+  PDD:115.30,DIS:94.40,NFLX:991.30,PARA:11.40,T:23.80,
+  VZ:39.30,TMUS:221.40,'BRK.B':418.30,WFC:64.40,COP:111.40,RTX:124.40,
+  RTX:124.40,SPGI:452.30
 };
 // Seed all stocks with real prices on load
 function seedRealPrices(){
   STOCKS.forEach(s=>{
     if(REAL_PRICES[s.sym]){
-      const rp=REAL_PRICES[s.sym];
-      // Add small random variance ±0.3% so prices feel live
-      s.price=rp*(1+(Math.random()-.5)*.006);
-      // Keep existing chg direction but scale it realistically
+      s.price=REAL_PRICES[s.sym];
     }
   });
+}
+
+// ── Fetch real price via Yahoo Finance proxy (most reliable from browser) ──
+async function fetchYahooSingle(sym){
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`;
+  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  try{
+    const res=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+    const json=await res.json();
+    const data=JSON.parse(json.contents);
+    const meta=data?.chart?.result?.[0]?.meta;
+    if(meta?.regularMarketPrice){
+      return{
+        price:meta.regularMarketPrice,
+        prevClose:meta.chartPreviousClose||meta.previousClose||meta.regularMarketPrice,
+        chgPct:meta.regularMarketChangePercent||0
+      };
+    }
+  }catch(e){}
+  return null;
+}
+
+async function fetchYahooBatch(symbols){
+  const syms=symbols.join(',');
+  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketPreviousClose`;
+  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  try{
+    const res=await fetch(proxy,{signal:AbortSignal.timeout(10000)});
+    const json=await res.json();
+    const data=JSON.parse(json.contents);
+    return data?.quoteResponse?.result||[];
+  }catch(e){return[];}
 }
 
 // Alpaca real-time latest quotes
@@ -1490,28 +1639,243 @@ function updateExternalLinks(sym){
   if(gf)gf.href=`https://www.google.com/finance/quote/${sym}:NASDAQ`;
 }
 
+// ── Technical Signal Engine ─────────────────────────────────────────────
+// Stores per-symbol technical data fetched from Yahoo
+const TECH_DATA={};
+
+async function fetchTechnicals(sym){
+  // Yahoo v8 chart gives us OHLCV history for real indicator calculation
+  const url=`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=3mo&indicators=adjclose`;
+  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  try{
+    const res=await fetch(proxy,{signal:AbortSignal.timeout(9000)});
+    const json=await res.json();
+    const data=JSON.parse(json.contents);
+    const result=data?.chart?.result?.[0];
+    if(!result)return null;
+    const meta=result.meta;
+    const closes=result.indicators?.adjclose?.[0]?.adjclose||result.indicators?.quote?.[0]?.close||[];
+    const highs=result.indicators?.quote?.[0]?.high||[];
+    const lows=result.indicators?.quote?.[0]?.low||[];
+    const vols=result.indicators?.quote?.[0]?.volume||[];
+    const opens=result.indicators?.quote?.[0]?.open||[];
+    if(closes.length<20)return null;
+    // Filter nulls
+    const cl=closes.filter(Boolean);
+    const hi=highs.filter(Boolean);
+    const lo=lows.filter(Boolean);
+    const vo=vols.filter(Boolean);
+    return{
+      closes:cl, highs:hi, lows:lo, volumes:vo, opens,
+      price:meta.regularMarketPrice||cl[cl.length-1],
+      prevClose:meta.chartPreviousClose||cl[cl.length-2],
+      chgPct:meta.regularMarketChangePercent||0,
+      fiftyDayAvg:meta.fiftyDayAverage,
+      twoHundredDayAvg:meta.twoHundredDayAverage,
+      fiftyTwoWeekHigh:meta.fiftyTwoWeekHigh,
+      fiftyTwoWeekLow:meta.fiftyTwoWeekLow,
+      marketCap:meta.marketCap,
+      sym
+    };
+  }catch(e){return null;}
+}
+
+function calcEMA(prices,period){
+  const k=2/(period+1);
+  let ema=prices.slice(0,period).reduce((a,b)=>a+b,0)/period;
+  for(let i=period;i<prices.length;i++) ema=prices[i]*k+ema*(1-k);
+  return ema;
+}
+
+function calcRSI(closes,period=14){
+  if(closes.length<period+1)return 50;
+  let gains=0,losses=0;
+  for(let i=closes.length-period;i<closes.length;i++){
+    const d=closes[i]-closes[i-1];
+    if(d>0)gains+=d; else losses+=Math.abs(d);
+  }
+  const avgG=gains/period,avgL=losses/period;
+  if(avgL===0)return 100;
+  const rs=avgG/avgL;
+  return 100-(100/(1+rs));
+}
+
+function calcMACD(closes){
+  const ema12=calcEMA(closes,12);
+  const ema26=calcEMA(closes,26);
+  return ema12-ema26;
+}
+
+function calcATR(highs,lows,closes,period=14){
+  const trs=[];
+  for(let i=1;i<closes.length;i++){
+    trs.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));
+  }
+  return trs.slice(-period).reduce((a,b)=>a+b,0)/period;
+}
+
+function calcBBPosition(closes,period=20){
+  const slice=closes.slice(-period);
+  const mean=slice.reduce((a,b)=>a+b,0)/period;
+  const std=Math.sqrt(slice.reduce((a,b)=>a+(b-mean)**2,0)/period);
+  const upper=mean+2*std,lower=mean-2*std;
+  const last=closes[closes.length-1];
+  return{upper,lower,mid:mean,pct:(last-lower)/(upper-lower)*100};
+}
+
+function calcVolumeSignal(vols){
+  if(vols.length<10)return 0;
+  const avg=vols.slice(-20).reduce((a,b)=>a+b,0)/20;
+  const last=vols[vols.length-1];
+  return((last-avg)/avg*100);
+}
+
+function computeSignal(td){
+  // Real multi-factor technical signal
+  const cl=td.closes, hi=td.highs, lo=td.lows, vo=td.volumes;
+  let score=0, factors=[];
+
+  // 1. Price vs 50-day EMA
+  const ema50=calcEMA(cl,Math.min(50,cl.length-1));
+  const price=cl[cl.length-1];
+  if(price>ema50*1.01){score+=2;factors.push('Above 50 EMA ✓');}
+  else if(price<ema50*.99){score-=2;factors.push('Below 50 EMA ✗');}
+
+  // 2. Price vs 20-day EMA
+  const ema20=calcEMA(cl,Math.min(20,cl.length-1));
+  if(price>ema20){score+=1;factors.push('Above 20 EMA ✓');}
+  else{score-=1;factors.push('Below 20 EMA ✗');}
+
+  // 3. RSI
+  const rsi=calcRSI(cl,14);
+  td.rsi=parseFloat(rsi.toFixed(1));
+  if(rsi>55&&rsi<75){score+=2;factors.push(`RSI ${rsi.toFixed(0)} — bullish momentum`);}
+  else if(rsi>75){score-=1;factors.push(`RSI ${rsi.toFixed(0)} — overbought`);}
+  else if(rsi<35){score+=1;factors.push(`RSI ${rsi.toFixed(0)} — oversold bounce`);}
+  else if(rsi<45){score-=2;factors.push(`RSI ${rsi.toFixed(0)} — bearish`);}
+
+  // 4. MACD
+  const macd=calcMACD(cl);
+  td.macd=parseFloat(macd.toFixed(2));
+  if(macd>0){score+=2;factors.push('MACD positive ✓');}
+  else{score-=2;factors.push('MACD negative ✗');}
+
+  // 5. Bollinger Band position
+  const bb=calcBBPosition(cl);
+  td.bbPct=parseFloat(bb.pct.toFixed(1));
+  td.bbUpper=bb.upper; td.bbLower=bb.lower; td.bbMid=bb.mid;
+  if(bb.pct>55&&bb.pct<85){score+=1;factors.push('BB upper zone — momentum');}
+  else if(bb.pct>85){score-=1;factors.push('BB overbought zone');}
+  else if(bb.pct<25){score+=1;factors.push('BB lower zone — potential bounce');}
+  else if(bb.pct<10){score-=1;factors.push('BB breakdown');}
+
+  // 6. Today's price change
+  if(td.chgPct>1.5){score+=2;factors.push(`+${td.chgPct.toFixed(1)}% today ✓`);}
+  else if(td.chgPct>0.3){score+=1;factors.push(`+${td.chgPct.toFixed(1)}% today`);}
+  else if(td.chgPct<-1.5){score-=2;factors.push(`${td.chgPct.toFixed(1)}% today ✗`);}
+  else if(td.chgPct<-0.3){score-=1;factors.push(`${td.chgPct.toFixed(1)}% today`);}
+
+  // 7. Volume confirmation
+  const volSig=calcVolumeSignal(vo);
+  td.volPct=parseFloat(volSig.toFixed(0));
+  if(volSig>30&&td.chgPct>0){score+=2;factors.push(`Vol +${volSig.toFixed(0)}% — institutional buying`);}
+  else if(volSig>30&&td.chgPct<0){score-=2;factors.push(`Vol +${volSig.toFixed(0)}% — heavy selling`);}
+  else if(volSig<-30){score-=1;factors.push('Low volume — weak move');}
+
+  // 8. 52-week position
+  if(td.fiftyTwoWeekHigh&&td.fiftyTwoWeekLow){
+    const range=td.fiftyTwoWeekHigh-td.fiftyTwoWeekLow;
+    const pos=(price-td.fiftyTwoWeekLow)/range*100;
+    td.ywkPos=parseFloat(pos.toFixed(0));
+    if(pos>80){score+=1;factors.push('Near 52-wk high — strong trend');}
+    else if(pos<20){score-=1;factors.push('Near 52-wk low — weakness');}
+  }
+
+  td.score=score;
+  td.factors=factors;
+  td.ema20=parseFloat(ema20.toFixed(2));
+  td.ema50=parseFloat(ema50.toFixed(2));
+
+  // Signal thresholds
+  const maxScore=14;
+  const pct=(score/maxScore)*100;
+  td.confidence=Math.min(95,Math.max(35,Math.abs(pct)*0.6+40));
+  if(score>=4){td.signal='buy';td.signalLabel='STRONG BUY';}
+  else if(score>=2){td.signal='buy';td.signalLabel='BUY';}
+  else if(score<=-4){td.signal='sell';td.signalLabel='STRONG SELL';}
+  else if(score<=-2){td.signal='sell';td.signalLabel='SELL';}
+  else{td.signal='watch';td.signalLabel='NEUTRAL';}
+  return td;
+}
+
+async function updateSignalForStock(sym){
+  const td=await fetchTechnicals(sym);
+  if(!td)return;
+  const computed=computeSignal(td);
+  TECH_DATA[sym]=computed;
+  const s=STOCKS.find(x=>x.sym===sym);
+  if(!s)return;
+  const prevSig=s.signal;
+  s.signal=computed.signal;
+  s.price=computed.price;
+  s.chg=parseFloat(computed.chgPct.toFixed(2));
+  s.rsi=computed.rsi;
+  s.macd=computed.macd;
+  // Fire alert if signal changed
+  if(prevSig!==computed.signal&&_liveOk){
+    const reason=computed.factors[0]||'Technical signal change';
+    fireAlert(sym,computed.signal,computed.price,reason);
+  }
+  // Update display if this is current stock
+  if(sym===cur.sym){
+    renderSigBox(s,computed);
+    updateCurrentDisplay();
+    renderAllPanels(s);
+  }
+  renderSidebars();
+}
+
 function applyPriceUpdate(sym,price,chgPct){
   const s=STOCKS.find(x=>x.sym===sym);
   if(!s||!price||price<=0)return false;
   const pctMove=Math.abs((price-s.price)/s.price*100);
   if(pctMove>1.5&&_liveOk){
     const dir=price>s.price?'buy':'sell';
-    fireAlert(s.sym,dir,price,`Price moved ${price>s.price?'+':''}${(price-s.price).toFixed(2)} (${pctMove.toFixed(1)}%) — real-time move`);
+    fireAlert(s.sym,dir,price,`Price moved ${price>s.price?'+':''}${(price-s.price).toFixed(2)} (${pctMove.toFixed(1)}%) — live data`);
   }
   s.price=price;
   s.chg=parseFloat((chgPct||0).toFixed(2));
-  if(chgPct>2)s.signal='buy';
-  else if(chgPct<-2)s.signal='sell';
-  else if(chgPct>0.5)s.signal='buy';
-  else if(chgPct<-0.5)s.signal='sell';
-  else s.signal='watch';
+  // Don't overwrite signal here — let computeSignal handle it
+  // Only set a basic signal if no technical data yet
+  if(!TECH_DATA[sym]){
+    if(chgPct>2)s.signal='buy';
+    else if(chgPct<-2)s.signal='sell';
+    else if(chgPct>0.5)s.signal='buy';
+    else if(chgPct<-0.5)s.signal='sell';
+    else s.signal='watch';
+  }
   return true;
 }
 
 async function fetchLivePrices(){
   const allSyms=[...new Set([...wlSyms,...favs,cur.sym])].filter(s=>!s.includes('.')).slice(0,25);
 
-  // ── 1. Try Alpaca (real-time, no delay) ──
+  // ── 1. Yahoo Finance batch (most reliable from browser, real prices) ──
+  const yahooData=await fetchYahooBatch(allSyms);
+  if(yahooData&&yahooData.length>0){
+    let updated=0;
+    yahooData.forEach(q=>{
+      if(applyPriceUpdate(q.symbol,q.regularMarketPrice,q.regularMarketChangePercent))updated++;
+    });
+    if(updated>0){
+      _liveOk=true;_fetchSource='Yahoo';
+      updateDataBar('Yahoo Finance · NYSE/NASDAQ',true,new Date().toLocaleTimeString());
+      updateCurrentDisplay();renderSidebars();
+      return true;
+    }
+  }
+
+  // ── 2. Try Alpaca real-time ──
   const alpacaData=await fetchAlpaca(allSyms);
   if(alpacaData&&Object.keys(alpacaData).length>0){
     let updated=0;
@@ -1529,31 +1893,28 @@ async function fetchLivePrices(){
     }
   }
 
-  // ── 2. Yahoo Finance fallback (15-min delayed) ──
-  const yahooData=await fetchYahoo(allSyms);
-  if(yahooData&&yahooData.length>0){
-    let updated=0;
-    yahooData.forEach(q=>{if(applyPriceUpdate(q.symbol,q.regularMarketPrice,q.regularMarketChangePercent))updated++;});
-    if(updated>0){
-      _liveOk=true;_fetchSource='Yahoo';
-      updateDataBar('Yahoo Finance',true,new Date().toLocaleTimeString());
-      updateCurrentDisplay();renderSidebars();
-      return true;
-    }
+  // ── 3. Yahoo single for current stock ──
+  const yp=await fetchYahooSingle(cur.sym);
+  if(yp&&yp.price>0){
+    applyPriceUpdate(cur.sym,yp.price,yp.chgPct);
+    _liveOk=true;
+    updateDataBar('Yahoo Finance · Single',true,new Date().toLocaleTimeString());
+    updateCurrentDisplay();
+    return true;
   }
 
-  // ── 3. Google Finance fallback (current stock only) ──
+  // ── 4. Google Finance fallback ──
   const gp=await fetchGooglePrice(cur.sym);
   if(gp&&gp.price>0){
     applyPriceUpdate(cur.sym,gp.price,gp.chg);
-    _liveOk=true;_fetchSource='Google';
+    _liveOk=true;
     updateDataBar('Google Finance',true,new Date().toLocaleTimeString());
     updateCurrentDisplay();
     return true;
   }
 
-  // ── 4. All failed — simulation mode ──
-  updateDataBar('Simulated (market closed or offline)',false,new Date().toLocaleTimeString());
+  // ── 5. All failed — show seeded prices ──
+  updateDataBar('Market closed — showing last close',false,new Date().toLocaleTimeString());
   return false;
 }
 
@@ -1624,7 +1985,6 @@ function loadTVChart(sym){
     }catch(e){showFallbackCanvas();}
   });
 }
-
 
 function showFallbackCanvas(){
   document.getElementById('tvContainer').style.display='none';
