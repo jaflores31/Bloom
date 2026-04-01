@@ -87,8 +87,9 @@ main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
 .csep{width:1px;height:16px;background:var(--border);margin:0 2px;}
 .ai-btn{padding:5px 13px;background:linear-gradient(135deg,rgba(179,136,214,.15),rgba(244,114,168,.15));border:1.5px solid rgba(179,136,214,.4);color:var(--lavender);font-family:'DM Sans',sans-serif;font-size:.63rem;border-radius:20px;cursor:pointer;font-weight:600;transition:all .2s;}
 .ai-btn:hover{background:rgba(179,136,214,.22);}
-#mainChart{width:100%;height:270px;display:block;}
-#volChart{width:100%;height:60px;display:block;}
+#mainChart{width:100%;height:270px;display:none;}
+#volChart{width:100%;height:60px;display:none;}
+#tvContainer{border-bottom:1px solid var(--border);}
 /* MODE TABS */
 .mode-tabs{display:flex;border-bottom:1.5px solid var(--border);background:var(--surface2);}
 .mode-tab{flex:none;padding:8px 18px;border:none;border-bottom:2.5px solid transparent;background:transparent;font-family:'DM Sans',sans-serif;font-size:.72rem;font-weight:600;color:var(--muted2);cursor:pointer;transition:all .18s;}
@@ -351,8 +352,26 @@ main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
     <div class="csep"></div>
     <button class="ai-btn" onclick="runAI()">✨ AI Analyze</button>
   </div>
-  <canvas id="mainChart"></canvas>
-  <canvas id="volChart"></canvas>
+  <!-- TRADINGVIEW CHART -->
+  <div id="tvContainer" style="height:340px;width:100%;position:relative;">
+    <div id="tvChart" style="height:100%;width:100%;"></div>
+    <div id="tvLoading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:var(--surface);flex-direction:column;gap:8px;">
+      <div class="spin"></div>
+      <div style="font-size:.62rem;color:var(--muted2)">Loading TradingView chart…</div>
+    </div>
+  </div>
+  <!-- FALLBACK CANVAS (hidden, used when TV blocked) -->
+  <canvas id="mainChart" style="display:none"></canvas>
+  <canvas id="volChart" style="display:none;height:60px"></canvas>
+</div>
+<!-- DATA SOURCE BAR -->
+<div id="dataSourceBar" style="display:flex;align-items:center;gap:10px;padding:4px 16px;border-bottom:1px solid var(--border);background:var(--surface2);flex-wrap:wrap;">
+  <span style="font-size:.52rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600">Data:</span>
+  <span id="dsSrc" style="font-size:.56rem;color:var(--muted2)">Fetching live prices…</span>
+  <span id="dsDelay" style="font-size:.52rem;padding:1px 6px;border-radius:6px;background:rgba(245,166,35,.1);color:var(--yellow);border:1px solid rgba(245,166,35,.25)"></span>
+  <span id="dsTime" style="font-size:.52rem;color:var(--muted);margin-left:auto"></span>
+  <a id="dsRhLink" href="#" target="_blank" style="font-size:.52rem;color:var(--accent);text-decoration:none;padding:1px 7px;border-radius:6px;border:1px solid rgba(232,84,122,.3);background:rgba(232,84,122,.05)">Open in Robinhood ↗</a>
+  <a id="dsGfLink" href="#" target="_blank" style="font-size:.52rem;color:#4285f4;text-decoration:none;padding:1px 7px;border-radius:6px;border:1px solid rgba(66,133,244,.3);background:rgba(66,133,244,.05)">Google Finance ↗</a>
 </div>
 <div class="lvl-bar" id="lvlBar"></div>
 
@@ -577,7 +596,11 @@ window.onload=()=>{
   STOCKS.forEach(s=>{prevSignals[s.sym]=s.signal;});
   // Demo: fire a welcome alert after 3s to show the system works
   setTimeout(()=>{fireAlert('NVDA','buy',cur.price,'Initial scan — ORB setup forming above VWAP');},3000);
-  setInterval(tick,3000);loadNews();
+  setInterval(tick,3000);
+  // Live price fetch: on load + every 30s (Yahoo 15-min delayed refresh)
+  fetchLivePrices();
+  setInterval(fetchLivePrices,30000);
+  loadNews();
   document.addEventListener('click',e=>{
     const dd=document.getElementById('sdrop');
     if(!dd.contains(e.target)&&!document.getElementById('hInput').contains(e.target))dd.style.display='none';
@@ -659,13 +682,19 @@ function selectStock(s){
   document.getElementById('hPrice').className=`h-price ${s.chg>=0?'green':'red'}`;
   document.getElementById('hChg').innerHTML=`<span class="${s.chg>=0?'green':'red'}">${s.chg>=0?'+':''}${s.chg.toFixed(2)}% today</span>`;
   renderSigBox(s);updateFavBtn();renderAllPanels(s);
-  genChart(s);setTimeout(drawChart,30);
+  genChart(s);// TradingView handles chart rendering
   document.getElementById('rrE').value=s.price.toFixed(2);
   document.getElementById('rrS').value=(s.price*.983).toFixed(2);
   document.getElementById('rrT').value=(s.price*1.048).toFixed(2);
   calcRR();
   document.getElementById('aiBlock').innerHTML='<span style="color:var(--muted2);font-size:.62rem;">Press ✨ AI Analyze for real-time analysis…</span>';
   renderSidebars();
+  // Load TradingView chart for this symbol
+  loadTVChart(s.sym);
+  // Update external links
+  updateExternalLinks(s.sym);
+  // Fetch fresh live price for this stock
+  setTimeout(()=>fetchLivePrices(),200);
 }
 function renderSigBox(s){
   const icon=s.signal==='buy'?'🌸':s.signal==='sell'?'🌹':'🌼';
@@ -918,7 +947,8 @@ function setMode(mode){
   document.getElementById('indBb').classList.toggle('on',m.bb);
   // Update panels for mode
   renderModeSpecificPanels(cur,mode);
-  genChart(cur);drawChart();
+  // Reload TradingView with new interval
+  loadTVChart(cur.sym);
   // Update dynamic card titles
   const orbT=document.getElementById('orbTitle');
   if(orbT)orbT.innerHTML=mode==='swing'?'📅 Swing Targets':'🔔 ORB';
@@ -935,7 +965,7 @@ function renderTfBtns(){
 function selectTf(idx){
   curTfIdx=idx;
   renderTfBtns();
-  genChart(cur);drawChart();
+  loadTVChart(cur.sym);
 }
 
 function setTf(btn){} // legacy no-op
@@ -1344,16 +1374,230 @@ function maybeFlipSignal(){
 }
 
 // =====================================================================
-// PRICE TICK
+// =====================================================================
+// LIVE PRICE DATA — Alpaca Markets (real-time) + Yahoo + Google fallback
+// =====================================================================
+let _liveOk=false;
+let _fetchSource='';
+const ALPACA_KEY='PKYJPSDGC6ZNEYWX55PJ3U7ROC';
+const ALPACA_SECRET='Acsh1y5wXakXcY3RuYjQH8T1SXGDrn6GWXsMqMifAQvUoQPyeA1ExxvNrhPWAspZL4NyZyhVL7';
+const ALPACA_BASE='https://data.alpaca.markets/v2';
+
+// Alpaca real-time latest quotes
+async function fetchAlpaca(symbols){
+  const syms=symbols.filter(s=>!s.includes('.')).join(',');
+  if(!syms)return null;
+  try{
+    const res=await fetch(`${ALPACA_BASE}/stocks/snapshots?symbols=${encodeURIComponent(syms)}`,{
+      headers:{'APCA-API-KEY-ID':ALPACA_KEY,'APCA-API-SECRET-KEY':ALPACA_SECRET},
+      signal:AbortSignal.timeout(8000)
+    });
+    if(!res.ok)throw new Error(`Alpaca ${res.status}`);
+    return await res.json();
+  }catch(e){console.warn('Alpaca err:',e.message);return null;}
+}
+
+// Yahoo Finance fallback via proxy
+async function fetchYahoo(symbols){
+  const syms=symbols.join(',');
+  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent`;
+  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  try{
+    const res=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+    const json=await res.json();
+    const data=JSON.parse(json.contents);
+    return data?.quoteResponse?.result||[];
+  }catch(e){return null;}
+}
+
+// Google Finance fallback
+async function fetchGooglePrice(sym){
+  const url=`https://www.google.com/finance/quote/${sym}:NASDAQ`;
+  const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+  try{
+    const res=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+    const json=await res.json();
+    const html=json.contents||'';
+    const m=html.match(/data-last-price="([0-9.]+)"/);
+    const mc=html.match(/data-last-price-change="([+-]?[0-9.]+)"/);
+    if(m)return{price:parseFloat(m[1]),chg:mc?parseFloat(mc[1]):0};
+  }catch(e){}
+  return null;
+}
+
+function updateDataBar(source,delayed,time){
+  const srcEl=document.getElementById('dsSrc');
+  const dlEl=document.getElementById('dsDelay');
+  const tmEl=document.getElementById('dsTime');
+  const col=source.includes('Alpaca')?'var(--green)':source.includes('Yahoo')?'#6c3d91':source.includes('Google')?'#4285f4':'var(--muted2)';
+  if(srcEl)srcEl.innerHTML=`<span style="color:${col}">✓ ${source}</span>`;
+  if(dlEl){dlEl.textContent=delayed?'15-min delayed':'● Real-Time';dlEl.style.background=delayed?'rgba(245,166,35,.1)':'rgba(91,191,142,.1)';dlEl.style.color=delayed?'var(--yellow)':'var(--green)';dlEl.style.borderColor=delayed?'rgba(245,166,35,.25)':'rgba(91,191,142,.3)';}
+  if(tmEl)tmEl.textContent=`Updated ${time}`;
+}
+
+function updateExternalLinks(sym){
+  const rh=document.getElementById('dsRhLink');
+  const gf=document.getElementById('dsGfLink');
+  if(rh)rh.href=`https://robinhood.com/stocks/${sym}`;
+  if(gf)gf.href=`https://www.google.com/finance/quote/${sym}:NASDAQ`;
+}
+
+function applyPriceUpdate(sym,price,chgPct){
+  const s=STOCKS.find(x=>x.sym===sym);
+  if(!s||!price||price<=0)return false;
+  const pctMove=Math.abs((price-s.price)/s.price*100);
+  if(pctMove>1.5&&_liveOk){
+    const dir=price>s.price?'buy':'sell';
+    fireAlert(s.sym,dir,price,`Price moved ${price>s.price?'+':''}${(price-s.price).toFixed(2)} (${pctMove.toFixed(1)}%) — real-time move`);
+  }
+  s.price=price;
+  s.chg=parseFloat((chgPct||0).toFixed(2));
+  if(chgPct>2)s.signal='buy';
+  else if(chgPct<-2)s.signal='sell';
+  else if(chgPct>0.5)s.signal='buy';
+  else if(chgPct<-0.5)s.signal='sell';
+  else s.signal='watch';
+  return true;
+}
+
+async function fetchLivePrices(){
+  const allSyms=[...new Set([...wlSyms,...favs,cur.sym])].filter(s=>!s.includes('.')).slice(0,25);
+
+  // ── 1. Try Alpaca (real-time, no delay) ──
+  const alpacaData=await fetchAlpaca(allSyms);
+  if(alpacaData&&Object.keys(alpacaData).length>0){
+    let updated=0;
+    Object.entries(alpacaData).forEach(([sym,snap])=>{
+      const price=snap?.latestTrade?.p||snap?.minuteBar?.c||snap?.dailyBar?.c;
+      const prevClose=snap?.prevDailyBar?.c||price;
+      const chgPct=prevClose?((price-prevClose)/prevClose*100):0;
+      if(applyPriceUpdate(sym,price,chgPct))updated++;
+    });
+    if(updated>0){
+      _liveOk=true;_fetchSource='Alpaca';
+      updateDataBar('Alpaca Markets — Real-Time',false,new Date().toLocaleTimeString());
+      updateCurrentDisplay();renderSidebars();
+      return true;
+    }
+  }
+
+  // ── 2. Yahoo Finance fallback (15-min delayed) ──
+  const yahooData=await fetchYahoo(allSyms);
+  if(yahooData&&yahooData.length>0){
+    let updated=0;
+    yahooData.forEach(q=>{if(applyPriceUpdate(q.symbol,q.regularMarketPrice,q.regularMarketChangePercent))updated++;});
+    if(updated>0){
+      _liveOk=true;_fetchSource='Yahoo';
+      updateDataBar('Yahoo Finance',true,new Date().toLocaleTimeString());
+      updateCurrentDisplay();renderSidebars();
+      return true;
+    }
+  }
+
+  // ── 3. Google Finance fallback (current stock only) ──
+  const gp=await fetchGooglePrice(cur.sym);
+  if(gp&&gp.price>0){
+    applyPriceUpdate(cur.sym,gp.price,gp.chg);
+    _liveOk=true;_fetchSource='Google';
+    updateDataBar('Google Finance',true,new Date().toLocaleTimeString());
+    updateCurrentDisplay();
+    return true;
+  }
+
+  // ── 4. All failed — simulation mode ──
+  updateDataBar('Simulated (market closed or offline)',false,new Date().toLocaleTimeString());
+  return false;
+}
+
+function updateCurrentDisplay(){
+  const s=STOCKS.find(x=>x.sym===cur.sym);
+  if(!s)return;
+  const priceEl=document.getElementById('hPrice');
+  const chgEl=document.getElementById('hChg');
+  if(priceEl){priceEl.textContent=`$${s.price.toFixed(2)}`;priceEl.className=`h-price ${s.chg>=0?'green':'red'}`;}
+  if(chgEl)chgEl.innerHTML=`<span class="${s.chg>=0?'green':'red'}">${s.chg>=0?'+':''}${s.chg.toFixed(2)}% today</span>`;
+  renderAllPanels(s);
+  updateExternalLinks(cur.sym);
+}
+
+// =====================================================================
+// TRADINGVIEW CHART INTEGRATION
+// =====================================================================
+let tvWidget=null;
+let tvScriptLoaded=false;
+
+function loadTVScript(cb){
+  if(tvScriptLoaded){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://s3.tradingview.com/tv.js';
+  s.onload=()=>{tvScriptLoaded=true;cb();};
+  s.onerror=()=>{showFallbackCanvas();};
+  document.head.appendChild(s);
+}
+
+function loadTVChart(sym){
+  const container=document.getElementById('tvChart');
+  const loading=document.getElementById('tvLoading');
+  if(!container)return;
+  // Map intervals
+  const tvInterval=()=>{
+    const tf=MODES[curMode].intervals[curTfIdx].lbl;
+    const map={'1M':'1','2M':'2','3M':'3','5M':'5','10M':'10','15M':'15','30M':'30','1H':'60','2H':'120','4H':'240','1D':'D','2D':'3D','1W':'W','1M':'M'};
+    return map[tf]||'5';
+  };
+  loadTVScript(()=>{
+    try{
+      container.innerHTML='';
+      if(loading)loading.style.display='none';
+      // TradingView widget
+      new TradingView.widget({
+        container_id:'tvChart',
+        symbol:`NASDAQ:${sym}`,
+        interval:tvInterval(),
+        timezone:'America/New_York',
+        theme:'light',
+        style:'1',
+        locale:'en',
+        toolbar_bg:'#fff8fb',
+        enable_publishing:false,
+        allow_symbol_change:false,
+        save_image:false,
+        hide_side_toolbar:false,
+        studies:curMode==='day'?['VWAP@tv-basicstudies','MASimple@tv-basicstudies']:['BB@tv-basicstudies','MASimple@tv-basicstudies'],
+        width:'100%',
+        height:340,
+        autosize:true,
+        hide_legend:false,
+        withdateranges:true,
+        show_popup_button:true,
+        popup_width:'1000',
+        popup_height:'650',
+      });
+    }catch(e){showFallbackCanvas();}
+  });
+}
+
+function showFallbackCanvas(){
+  document.getElementById('tvContainer').style.display='none';
+  document.getElementById('mainChart').style.display='block';
+  document.getElementById('volChart').style.display='block';
+  genChart(cur);drawChart();
+}
+
+// =====================================================================
+// PRICE TICK (simulation fallback when markets closed / fetch fails)
 // =====================================================================
 function tick(){
-  [...new Set([...wlSyms,...favs])].forEach(sym=>{
-    const s=STOCKS.find(x=>x.sym===sym);if(!s)return;
-    s.price=Math.max(.5,s.price+(Math.random()-.48)*s.price*.001);
-    s.chg=parseFloat((s.chg+(Math.random()-.5)*.03).toFixed(2));
-  });
-  const s=STOCKS.find(x=>x.sym===cur.sym);
-  if(s){document.getElementById('hPrice').textContent=`$${s.price.toFixed(2)}`;document.getElementById('hChg').innerHTML=`<span class="${s.chg>=0?'green':'red'}">${s.chg>=0?'+':''}${s.chg.toFixed(2)}% today</span>`;}
+  if(!_liveOk){
+    // Simulate small price movements when no live data
+    [...new Set([...wlSyms,...favs])].forEach(sym=>{
+      const s=STOCKS.find(x=>x.sym===sym);if(!s)return;
+      s.price=Math.max(.5,s.price+(Math.random()-.48)*s.price*.0005);
+      s.chg=parseFloat((s.chg+(Math.random()-.5)*.02).toFixed(2));
+    });
+    const s=STOCKS.find(x=>x.sym===cur.sym);
+    if(s){document.getElementById('hPrice').textContent=`$${s.price.toFixed(2)}`;document.getElementById('hChg').innerHTML=`<span class="${s.chg>=0?'green':'red'}">${s.chg>=0?'+':''}${s.chg.toFixed(2)}% today</span>`;}
+  }
   maybeFlipSignal();
   checkSignals();
   renderSidebars();
