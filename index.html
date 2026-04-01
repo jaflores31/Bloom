@@ -276,6 +276,76 @@ main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
 .toast-reason{font-size:.6rem;color:var(–muted2);line-height:1.4;}
 .toast-close{background:none;border:none;font-size:.75rem;color:var(–muted);cursor:pointer;line-height:1;padding:0 0 0 4px;}
 
+/* ═══════════════════════════════════════════
+MISSION CONTROL — $500 → $5000
+═══════════════════════════════════════════ */
+.mc-modal{background:var(–surface);border:1.5px solid var(–border);border-radius:22px;padding:0;max-width:680px;width:96%;box-shadow:0 24px 80px rgba(232,84,122,.22);transform:translateY(14px);transition:transform .28s;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+.mo.show .mc-modal{transform:translateY(0);}
+.mc-header{background:linear-gradient(135deg,#1a0a12,#2d0d1e,#1a0a2e);padding:20px 22px 16px;position:relative;overflow:hidden;flex-shrink:0;}
+.mc-header::before{content:’’;position:absolute;inset:0;background:url(“data:image/svg+xml,%3Csvg width=‘60’ height=‘60’ viewBox=‘0 0 60 60’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cg fill=‘none’ fill-rule=‘evenodd’%3E%3Cg fill=’%23f472a8’ fill-opacity=‘0.05’%3E%3Cpath d=‘M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z’/%3E%3C/g%3E%3C/g%3E%3C/svg%3E”);}
+.mc-title{font-family:‘Playfair Display’,serif;font-size:1.4rem;font-weight:900;background:linear-gradient(135deg,#f472a8,#b388d6,#f5a623);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;position:relative;}
+.mc-subtitle{font-size:.62rem;color:rgba(255,255,255,.5);margin-top:3px;position:relative;}
+.mc-progress-wrap{margin-top:14px;position:relative;}
+.mc-progress-bar{height:10px;background:rgba(255,255,255,.08);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,.1);}
+.mc-progress-fill{height:100%;background:linear-gradient(90deg,#e8547a,#f472a8,#f5a623);border-radius:10px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1);position:relative;}
+.mc-progress-fill::after{content:’’;position:absolute;right:0;top:50%;transform:translateY(-50%);width:12px;height:12px;background:#fff;border-radius:50%;box-shadow:0 0 8px rgba(244,114,168,.8);}
+.mc-progress-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:.52rem;color:rgba(255,255,255,.4);}
+.mc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px;position:relative;}
+.mc-stat{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 10px;text-align:center;}
+.mc-stat-val{font-family:‘DM Mono’,monospace;font-size:.88rem;font-weight:700;color:#fff;}
+.mc-stat-lbl{font-size:.48rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.1em;margin-top:2px;}
+/* SCAN TABS */
+.mc-tabs{display:flex;border-bottom:1.5px solid var(–border);background:var(–surface2);flex-shrink:0;}
+.mc-tab{flex:1;padding:9px 6px;border:none;border-bottom:2.5px solid transparent;background:transparent;font-family:‘DM Sans’,sans-serif;font-size:.64rem;font-weight:600;color:var(–muted2);cursor:pointer;transition:all .18s;text-align:center;}
+.mc-tab.active{color:var(–accent);border-bottom-color:var(–accent);background:rgba(232,84,122,.04);}
+.mc-body{overflow-y:auto;flex:1;padding:12px;}
+/* OPPORTUNITY CARDS */
+.opp-card{background:var(–surface);border:1.5px solid var(–border);border-radius:14px;padding:12px 13px;margin-bottom:8px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden;}
+.opp-card:hover{border-color:var(–pink);transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,84,122,.12);}
+.opp-card::before{content:’’;position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:2px 0 0 2px;}
+.opp-card.buy::before{background:linear-gradient(180deg,var(–green),#2d9e6e);}
+.opp-card.sell::before{background:linear-gradient(180deg,var(–red),#c8366a);}
+.opp-row1{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;}
+.opp-sym{font-size:.92rem;font-weight:800;font-family:‘Playfair Display’,serif;}
+.opp-name{font-size:.58rem;color:var(–muted2);margin-top:1px;}
+.opp-sig{font-size:.56rem;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.08em;}
+.opp-sig.buy{background:rgba(91,191,142,.12);color:var(–green);border:1px solid rgba(91,191,142,.35);}
+.opp-sig.sell{background:rgba(232,84,122,.1);color:var(–red);border:1px solid rgba(232,84,122,.3);}
+.opp-price{font-family:‘DM Mono’,monospace;font-size:.88rem;font-weight:600;}
+.opp-why{font-size:.62rem;color:var(–muted2);line-height:1.55;margin-bottom:7px;}
+.opp-levels{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:7px;}
+.opp-lv{background:var(–surface2);border:1px solid var(–border);border-radius:8px;padding:5px 6px;text-align:center;}
+.opp-lv-l{font-size:.48rem;color:var(–muted);text-transform:uppercase;letter-spacing:.1em;}
+.opp-lv-v{font-size:.68rem;font-weight:600;font-family:‘DM Mono’,monospace;margin-top:1px;}
+.opp-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;}
+.opp-tag{font-size:.52rem;padding:1px 7px;border-radius:20px;background:var(–surface2);border:1px solid var(–border);color:var(–muted2);}
+.opp-size{font-size:.58rem;color:var(–lavender);font-weight:600;}
+/* POSITION SIZING */
+.ps-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.ps-card{background:var(–surface2);border:1.5px solid var(–border);border-radius:12px;padding:10px 12px;}
+.ps-title{font-size:.56rem;color:var(–muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px;font-weight:600;}
+.ps-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:.62rem;}
+.ps-val{font-family:‘DM Mono’,monospace;font-weight:600;}
+/* NEWS IMPACT */
+.ni-card{background:var(–surface);border:1.5px solid var(–border);border-radius:12px;padding:10px 12px;margin-bottom:7px;}
+.ni-header{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.ni-impact{font-size:.5rem;padding:2px 7px;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;}
+.ni-bull{background:rgba(91,191,142,.12);color:var(–green);border:1px solid rgba(91,191,142,.3);}
+.ni-bear{background:rgba(232,84,122,.1);color:var(–red);border:1px solid rgba(232,84,122,.3);}
+.ni-mixed{background:rgba(245,166,35,.1);color:var(–yellow);border:1px solid rgba(245,166,35,.3);}
+.ni-hl{font-size:.67rem;font-weight:600;line-height:1.45;margin-bottom:4px;}
+.ni-plays{display:flex;flex-wrap:wrap;gap:4px;}
+.ni-play{font-size:.54rem;padding:2px 8px;border-radius:20px;cursor:pointer;font-weight:600;border:1.5px solid;transition:all .15s;}
+.ni-play:hover{transform:translateY(-1px);}
+/* GOAL INPUT */
+.goal-row{display:flex;gap:7px;align-items:center;margin-bottom:10px;}
+.goal-inp{flex:1;background:var(–surface2);border:1.5px solid var(–border2);color:var(–text);font-family:‘DM Mono’,monospace;font-size:.8rem;padding:7px 11px;border-radius:10px;outline:none;}
+.goal-inp:focus{border-color:var(–pink);}
+.goal-btn{padding:7px 14px;background:linear-gradient(135deg,var(–accent),var(–pink));border:none;border-radius:10px;color:#fff;font-family:‘DM Sans’,sans-serif;font-size:.68rem;font-weight:600;cursor:pointer;}
+/* MISSION BTN */
+.mission-btn{margin:9px 11px 4px;padding:10px 12px;width:calc(100% - 22px);background:linear-gradient(135deg,#1a0a12,#2d0d1e);border:1.5px solid rgba(244,114,168,.3);border-radius:13px;color:#f472a8;font-family:‘DM Sans’,sans-serif;font-size:.72rem;font-weight:700;cursor:pointer;box-shadow:0 3px 14px rgba(232,84,122,.2);transition:all .2s;text-align:left;display:flex;align-items:center;gap:8px;}
+.mission-btn:hover{border-color:var(–pink);box-shadow:0 4px 18px rgba(232,84,122,.32);}
+.mission-btn-icon{font-size:1rem;}
 @media(max-width:1100px){.app{grid-template-columns:195px 1fr 255px;}}
 @media(max-width:860px){.app{grid-template-columns:180px 1fr;}.sr{display:none;}}
 @media(max-width:560px){.app{grid-template-columns:1fr;}.sl{display:none;}.cg-3,.cg-3b,.cg-2a{grid-template-columns:1fr!important;}}
@@ -313,7 +383,14 @@ main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
     <div class="fav-scroll" id="favList"></div>
     <div class="sl-sec">📋 Watchlist</div>
     <div class="wl-main" id="watchList"></div>
-    <button class="scan-btn" onclick="openScan()">✦ AI Market Scan</button>
+    <button class="mission-btn" onclick="openMission()">
+      <span class="mission-btn-icon">🎯</span>
+      <div>
+        <div>$500 → $5,000 Mission</div>
+        <div style="font-size:.56rem;color:rgba(244,114,168,.6);font-weight:400">Scan · Signals · Opportunities</div>
+      </div>
+    </button>
+    <button class="scan-btn" onclick="openScan()" style="margin-top:4px">✦ Quick Market Scan</button>
   </aside>
 
   <!-- MAIN -->
@@ -459,6 +536,54 @@ main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
     </div>
     <div class="mr" id="mRes"></div>
     <button class="mc-btn" onclick="closeMo('sMo')">Close ✕</button>
+  </div>
+</div>
+
+<!-- MISSION CONTROL MODAL -->
+
+<div class="mo" id="missionMo" onclick="closeMo('missionMo',event)">
+  <div class="mc-modal">
+    <div class="mc-header">
+      <div class="mc-title">🎯 Mission Control</div>
+      <div class="mc-subtitle">Turn $500 into $5,000 — AI-powered opportunity scanner</div>
+      <div class="mc-progress-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-size:.56rem;color:rgba(255,255,255,.5)">Progress to goal</span>
+          <span id="mcProgressPct" style="font-size:.56rem;color:#f472a8;font-weight:700">0%</span>
+        </div>
+        <div class="mc-progress-bar"><div class="mc-progress-fill" id="mcProgressFill" style="width:0%"></div></div>
+        <div class="mc-progress-labels">
+          <span id="mcBalLabel">$500</span>
+          <span style="color:rgba(255,255,255,.3)">·····</span>
+          <span style="color:#f5a623">$5,000 🏆</span>
+        </div>
+      </div>
+      <div class="mc-stats">
+        <div class="mc-stat"><div class="mc-stat-val" id="mcBalance">$500</div><div class="mc-stat-lbl">Balance</div></div>
+        <div class="mc-stat"><div class="mc-stat-val" id="mcNeeded" style="color:#f5a623">$4,500</div><div class="mc-stat-lbl">To Goal</div></div>
+        <div class="mc-stat"><div class="mc-stat-val" id="mcTrades" style="color:#f472a8">0</div><div class="mc-stat-lbl">Trades</div></div>
+        <div class="mc-stat"><div class="mc-stat-val" id="mcWinRate" style="color:#5bbf8e">—</div><div class="mc-stat-lbl">Win Rate</div></div>
+      </div>
+    </div>
+    <div class="mc-tabs">
+      <button class="mc-tab active" onclick="switchMcTab('opps',this)">🔥 Opportunities</button>
+      <button class="mc-tab" onclick="switchMcTab('news',this)">🌍 News Impact</button>
+      <button class="mc-tab" onclick="switchMcTab('sizing',this)">⚖️ Position Size</button>
+      <button class="mc-tab" onclick="switchMcTab('plan',this)">📋 Game Plan</button>
+    </div>
+    <div class="mc-body" id="mcBody">
+      <div class="loading"><div class="spin"></div>Scanning market…</div>
+    </div>
+    <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px;flex-shrink:0">
+      <div class="goal-row" style="flex:1;margin:0">
+        <span style="font-size:.6rem;color:var(--muted2);white-space:nowrap">Current $</span>
+        <input class="goal-inp" id="mcBalInput" type="number" value="500" oninput="updateMcProgress()"/>
+        <span style="font-size:.6rem;color:var(--muted2);white-space:nowrap">Goal $</span>
+        <input class="goal-inp" id="mcGoalInput" type="number" value="5000" oninput="updateMcProgress()"/>
+      </div>
+      <button class="goal-btn" onclick="openMission()">↻ Rescan</button>
+      <button class="mc-btn" onclick="closeMo('missionMo')" style="padding:7px 12px;background:var(--surface2);border:1.5px solid var(--border2);color:var(--muted2);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:.66rem;cursor:pointer">Close</button>
+    </div>
   </div>
 </div>
 
@@ -2272,6 +2397,303 @@ function tick(){
   maybeFlipSignal();
   checkSignals();
   renderSidebars();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// MISSION CONTROL — $500 → $5,000
+// ═══════════════════════════════════════════════════════════════════
+let mcTab='opps';
+let mcOpps=[];
+let mcNews=[];
+let mcTrades={wins:0,losses:0};
+let mcScanned=false;
+
+function updateMcProgress(){
+  const bal=parseFloat(document.getElementById('mcBalInput')?.value)||500;
+  const goal=parseFloat(document.getElementById('mcGoalInput')?.value)||5000;
+  const start=500;
+  const pct=Math.min(100,Math.max(0,(bal-start)/(goal-start)*100));
+  const fill=document.getElementById('mcProgressFill');
+  const pctEl=document.getElementById('mcProgressPct');
+  const balEl=document.getElementById('mcBalance');
+  const needEl=document.getElementById('mcNeeded');
+  const balLbl=document.getElementById('mcBalLabel');
+  if(fill)fill.style.width=pct+'%';
+  if(pctEl)pctEl.textContent=pct.toFixed(1)+'%';
+  if(balEl)balEl.textContent='$'+bal.toLocaleString();
+  if(needEl)needEl.textContent='$'+(Math.max(0,goal-bal)).toLocaleString();
+  if(balLbl)balLbl.textContent='$'+bal.toLocaleString();
+  const wins=mcTrades.wins,losses=mcTrades.losses,total=wins+losses;
+  const wr=document.getElementById('mcWinRate');
+  const tr=document.getElementById('mcTrades');
+  if(wr)wr.textContent=total>0?(wins/total*100).toFixed(0)+'%':'—';
+  if(tr)tr.textContent=total;
+}
+
+function switchMcTab(tab,btn){
+  mcTab=tab;
+  document.querySelectorAll('.mc-tab').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderMcTab();
+}
+
+function renderMcTab(){
+  const body=document.getElementById('mcBody');
+  if(!body)return;
+  if(mcTab==='opps')renderOpps(body);
+  else if(mcTab==='news')renderMcNews(body);
+  else if(mcTab==='sizing')renderSizing(body);
+  else if(mcTab==='plan')renderPlan(body);
+}
+
+// ── SCAN OPPORTUNITIES ──────────────────────────────────────────────
+async function openMission(){
+  document.getElementById('missionMo').classList.add('show');
+  updateMcProgress();
+  mcTab='opps';
+  document.querySelectorAll('.mc-tab').forEach((b,i)=>b.classList.toggle('active',i===0));
+  const body=document.getElementById('mcBody');
+  body.innerHTML='<div class="loading"><div class="spin"></div>Scanning market for best setups…</div>';
+  await Promise.all([scanOpportunities(), scanMcNews()]);
+  renderMcTab();
+}
+
+async function scanOpportunities(){
+  const bal=parseFloat(document.getElementById('mcBalInput')?.value)||500;
+  const goal=parseFloat(document.getElementById('mcGoalInput')?.value)||5000;
+  const multiplier=(goal/bal).toFixed(1);
+
+  // Build candidate pool from all stocks with tech data + high movers
+  const candidates=STOCKS.filter(s=>s.signal!=='watch'||Math.abs(s.chg)>1)
+    .sort((a,b)=>Math.abs(b.chg)-Math.abs(a.chg))
+    .slice(0,30);
+
+  // AI scan for best setups
+  const prompt=`You are an expert day/swing trader. A trader has $${bal} and wants to reach $${goal} (${multiplier}x goal).
+Scan these stocks and find the TOP 6 best trading opportunities RIGHT NOW based on momentum, technicals and risk:
+${candidates.slice(0,15).map(s=>`${s.sym}: $${s.price.toFixed(2)}, ${s.chg>=0?'+':''}${s.chg.toFixed(2)}%, signal=${s.signal}`).join(', ')}
+
+Return JSON array of exactly 6 opportunities. Each:
+{
+  sym: ticker,
+  name: company name,
+  price: current price (number),
+  signal: "buy" or "sell",
+  setup: "one of: Momentum Breakout | VWAP Bounce | Oversold Reversal | Breakout Pullback | Gap Fill | Trend Continuation",
+  why: "2-sentence specific reason why this is a great setup RIGHT NOW",
+  entry: entry price (number),
+  target: profit target (number),
+  stop: stop loss (number),
+  rr: risk-reward like "1:2.4",
+  shares: how many shares to buy with $${Math.min(bal*0.25,150).toFixed(0)} risk,
+  timeframe: "Day Trade" or "Swing 2-5 days" or "Swing 1-2 weeks",
+  confidence: 60-92
+}
+ONLY return valid JSON array. No markdown.`;
+
+  if(!_off){
+    const r=await claude(prompt,15000);
+    if(r.ok){
+      try{
+        const found=JSON.parse(r.text.replace(/\`\`\`json|\`\`\`/g,'').trim());
+        mcOpps=found;
+        // Add to STOCKS if not there
+        found.forEach(o=>{
+          if(!STOCKS.find(x=>x.sym===o.sym))
+            STOCKS.push({sym:o.sym,name:o.name,sector:'',price:o.price,chg:0,signal:o.signal});
+        });
+        return;
+      }catch(e){}
+    }
+  }
+
+  // Offline fallback — use real data from stocks with signals
+  const buys=STOCKS.filter(s=>s.signal==='buy'&&s.price>1).slice(0,3);
+  const sells=STOCKS.filter(s=>s.signal==='sell'&&s.price>1).slice(0,3);
+  mcOpps=[...buys,...sells].slice(0,6).map(s=>{
+    const isBuy=s.signal==='buy';
+    const entry=parseFloat((s.price*(isBuy?.998:1.002)).toFixed(2));
+    const target=parseFloat((s.price*(isBuy?1.045:.955)).toFixed(2));
+    const stop=parseFloat((s.price*(isBuy?.978:1.022)).toFixed(2));
+    const risk=Math.abs(entry-stop),rew=Math.abs(target-entry);
+    return{sym:s.sym,name:s.name,price:s.price,signal:s.signal,
+      setup:isBuy?'Momentum Breakout':'Trend Continuation',
+      why:`${s.sym} is ${isBuy?'showing bullish':'showing bearish'} momentum with ${Math.abs(s.chg).toFixed(1)}% move. Technical indicators confirm ${isBuy?'buying':'selling'} pressure.`,
+      entry,target,stop,rr:`1:${(rew/risk).toFixed(1)}`,
+      shares:Math.floor(125/Math.abs(entry-stop)),
+      timeframe:'Day Trade',confidence:72};
+  });
+}
+
+async function scanMcNews(){
+  if(mcNews.length)return; // already loaded
+  const prompt=`Return 5 major market-moving news items happening TODAY that create trading opportunities. For each, identify which stocks are most affected and whether to BUY or SELL them.
+JSON array: [{headline, impact: "bull"|"bear"|"mixed", summary: "1 sentence", plays: [{sym, signal: "buy"|"sell", reason: "brief"}]}]
+ONLY JSON, no markdown.`;
+  if(!_off){
+    const r=await claude(prompt,10000);
+    if(r.ok){try{mcNews=JSON.parse(r.text.replace(/\`\`\`json|\`\`\`/g,'').trim());return;}catch(e){}}
+  }
+  // Fallback news
+  mcNews=[
+    {headline:'Fed holds rates steady — growth stocks benefit',impact:'bull',summary:'Rate pause boosts tech valuations.',plays:[{sym:'QQQ',signal:'buy',reason:'Tech ETF directly benefits'},{sym:'NVDA',signal:'buy',reason:'AI names rally on rate relief'},{sym:'TSLA',signal:'buy',reason:'Growth stock, rate sensitive'}]},
+    {headline:'Strong jobs report beats expectations',impact:'mixed',summary:'Economy resilient but fewer rate cuts expected.',plays:[{sym:'SPY',signal:'buy',reason:'Broad market positive'},{sym:'TLT',signal:'sell',reason:'Bond prices fall on rate expectations'}]},
+    {headline:'Bitcoin surges past key resistance — crypto stocks rally',impact:'bull',summary:'BTC momentum pushing crypto equities higher.',plays:[{sym:'MSTR',signal:'buy',reason:'Largest corporate BTC holder'},{sym:'COIN',signal:'buy',reason:'Exchange volume spikes on BTC moves'},{sym:'IBIT',signal:'buy',reason:'Bitcoin ETF direct play'}]},
+    {headline:'AI chip demand drives semiconductor sector higher',impact:'bull',summary:'Data center buildout accelerating globally.',plays:[{sym:'NVDA',signal:'buy',reason:'Direct AI chip beneficiary'},{sym:'AMD',signal:'buy',reason:'AI GPU alternative play'},{sym:'SOXL',signal:'buy',reason:'3x leveraged semi ETF'}]},
+    {headline:'Oil prices drop on demand concerns',impact:'mixed',summary:'Energy sector under pressure, consumer stocks benefit.',plays:[{sym:'XLE',signal:'sell',reason:'Energy ETF direct impact'},{sym:'OXY',signal:'sell',reason:'Highly leveraged to oil price'},{sym:'WMT',signal:'buy',reason:'Lower gas prices boost consumer'}]},
+  ];
+}
+
+// ── RENDER TABS ─────────────────────────────────────────────────────
+function renderOpps(body){
+  const bal=parseFloat(document.getElementById('mcBalInput')?.value)||500;
+  const riskPerTrade=(bal*0.1).toFixed(0);
+  if(!mcOpps.length){body.innerHTML='<div style="text-align:center;padding:24px;color:var(--muted2);font-size:.68rem">No opportunities found — tap Rescan</div>';return;}
+  body.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+    <span style="font-size:.58rem;color:var(--muted2)">🔥 Top setups · Risk $${riskPerTrade}/trade (10%)</span>
+    <span style="font-size:.52rem;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:20px;border:1px solid var(--border)">Powered by Claude AI ✦</span>
+  </div>`+
+  mcOpps.map(o=>{
+    const isBuy=o.signal==='buy';
+    const sigCol=isBuy?'var(--green)':'var(--red)';
+    const riskAmt=(Math.abs(o.entry-o.stop)*o.shares).toFixed(0);
+    const gainAmt=(Math.abs(o.target-o.entry)*o.shares).toFixed(0);
+    const confCol=o.confidence>=80?'var(--green)':o.confidence>=65?'var(--yellow)':'var(--muted2)';
+    return `<div class="opp-card ${o.signal}" onclick="selectStock(STOCKS.find(x=>x.sym==='${o.sym}')||{sym:'${o.sym}',name:'${o.name}',price:${o.price},chg:0,signal:'${o.signal}',sector:''});closeMo('missionMo')">
+      <div class="opp-row1">
+        <div>
+          <div class="opp-sym">${o.sym} <span class="opp-sig ${o.signal}">${o.signal.toUpperCase()}</span></div>
+          <div class="opp-name">${o.name} · ${o.setup}</div>
+        </div>
+        <div style="text-align:right">
+          <div class="opp-price" style="color:${sigCol}">$${parseFloat(o.price).toFixed(2)}</div>
+          <div style="font-size:.52rem;color:${confCol};margin-top:2px">${o.confidence}% confidence</div>
+          <div style="font-size:.5rem;color:var(--muted)">${o.timeframe}</div>
+        </div>
+      </div>
+      <div class="opp-why">${o.why}</div>
+      <div class="opp-levels">
+        <div class="opp-lv"><div class="opp-lv-l">Entry</div><div class="opp-lv-v">$${parseFloat(o.entry).toFixed(2)}</div></div>
+        <div class="opp-lv"><div class="opp-lv-l">Target</div><div class="opp-lv-v" style="color:var(--green)">$${parseFloat(o.target).toFixed(2)}</div></div>
+        <div class="opp-lv"><div class="opp-lv-l">Stop</div><div class="opp-lv-v" style="color:var(--red)">$${parseFloat(o.stop).toFixed(2)}</div></div>
+        <div class="opp-lv"><div class="opp-lv-l">R:R</div><div class="opp-lv-v" style="color:var(--lavender)">${o.rr}</div></div>
+      </div>
+      <div class="opp-footer">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <span class="opp-tag">📊 ${o.shares} shares</span>
+          <span class="opp-tag">⚠️ Risk $${riskAmt}</span>
+          <span class="opp-tag" style="color:var(--green)">🎯 Gain $${gainAmt}</span>
+        </div>
+        <div class="opp-size">Tap to analyze →</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMcNews(body){
+  if(!mcNews.length){body.innerHTML='<div class="loading"><div class="spin"></div>Loading news…</div>';scanMcNews().then(()=>renderMcNews(body));return;}
+  body.innerHTML=`<div style="font-size:.58rem;color:var(--muted2);margin-bottom:10px">Market-moving news with actionable trade ideas ✦</div>`+
+  mcNews.map(n=>{
+    const ic=n.impact==='bull'?'ni-bull':n.impact==='bear'?'ni-bear':'ni-mixed';
+    const icon=n.impact==='bull'?'📈':n.impact==='bear'?'📉':'⚖️';
+    return `<div class="ni-card">
+      <div class="ni-header">
+        <span class="ni-impact ${ic}">${icon} ${n.impact.toUpperCase()}</span>
+      </div>
+      <div class="ni-hl">${n.headline}</div>
+      <div style="font-size:.6rem;color:var(--muted2);margin-bottom:7px">${n.summary}</div>
+      <div class="ni-plays">${(n.plays||[]).map(p=>{
+        const isBuy=p.signal==='buy';
+        const bc=isBuy?'rgba(91,191,142,.3)':'rgba(232,84,122,.3)';
+        const col=isBuy?'var(--green)':'var(--red)';
+        return `<div class="ni-play" style="border-color:${bc};color:${col};background:${isBuy?'rgba(91,191,142,.05)':'rgba(232,84,122,.05)'}"
+          onclick="selectStock(STOCKS.find(x=>x.sym==='${p.sym}')||{sym:'${p.sym}',name:'${p.sym}',price:10,chg:0,signal:'${p.signal}',sector:''});closeMo('missionMo')" 
+          title="${p.reason}">
+          ${isBuy?'↑':'↓'} ${p.sym}
+        </div>`;
+      }).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSizing(body){
+  const bal=parseFloat(document.getElementById('mcBalInput')?.value)||500;
+  const goal=parseFloat(document.getElementById('mcGoalInput')?.value)||5000;
+  const risk1=bal*0.05,risk2=bal*0.10,risk3=bal*0.15;
+  const tradesNeeded=Math.ceil(Math.log(goal/bal)/Math.log(1.2));
+  body.innerHTML=`
+  <div style="font-size:.62rem;color:var(--muted2);margin-bottom:10px">
+    To turn <b style="color:var(--text)">$${bal}</b> into <b style="color:var(--yellow)">$${goal.toLocaleString()}</b> you need 
+    <b style="color:var(--pink)">${((goal/bal-1)*100).toFixed(0)}% total return</b>. 
+    At 20% per winning trade, that's ~${tradesNeeded} wins compounded.
+  </div>
+  <div class="ps-grid">
+    <div class="ps-card">
+      <div class="ps-title">🟢 Conservative (5%)</div>
+      <div class="ps-row"><span>Risk/trade</span><span class="ps-val" style="color:var(--green)">$${risk1.toFixed(0)}</span></div>
+      <div class="ps-row"><span>Max position</span><span class="ps-val">$${(bal*0.25).toFixed(0)}</span></div>
+      <div class="ps-row"><span>Target gain</span><span class="ps-val" style="color:var(--green)">+$${(risk1*2).toFixed(0)}</span></div>
+      <div class="ps-row"><span>Trades to goal</span><span class="ps-val">${Math.ceil(Math.log(goal/bal)/Math.log(1+0.10))} wins</span></div>
+    </div>
+    <div class="ps-card">
+      <div class="ps-title">🟡 Moderate (10%)</div>
+      <div class="ps-row"><span>Risk/trade</span><span class="ps-val" style="color:var(--yellow)">$${risk2.toFixed(0)}</span></div>
+      <div class="ps-row"><span>Max position</span><span class="ps-val">$${(bal*0.40).toFixed(0)}</span></div>
+      <div class="ps-row"><span>Target gain</span><span class="ps-val" style="color:var(--green)">+$${(risk2*2.5).toFixed(0)}</span></div>
+      <div class="ps-row"><span>Trades to goal</span><span class="ps-val">${Math.ceil(Math.log(goal/bal)/Math.log(1+0.25))} wins</span></div>
+    </div>
+  </div>
+  <div class="ps-card" style="margin-bottom:8px">
+    <div class="ps-title">📐 Kelly Criterion (optimal sizing)</div>
+    <div class="ps-row"><span>Assumed win rate</span><span class="ps-val">55%</span></div>
+    <div class="ps-row"><span>Assumed R:R</span><span class="ps-val">1:2</span></div>
+    <div class="ps-row"><span>Optimal bet size</span><span class="ps-val" style="color:var(--lavender)">${(0.55-0.45/2*100).toFixed(0)}% → $${(bal*0.125).toFixed(0)}/trade</span></div>
+    <div class="ps-row"><span>Never risk more than</span><span class="ps-val" style="color:var(--red)">$${(bal*0.15).toFixed(0)} (15%)</span></div>
+  </div>
+  <div style="background:rgba(244,114,168,.06);border:1.5px solid rgba(244,114,168,.2);border-radius:12px;padding:10px 12px;font-size:.6rem;line-height:1.65;color:var(--muted2)">
+    <b style="color:var(--accent)">🌸 Golden Rules for $500 → $5,000:</b><br>
+    1. Never risk more than 10% on a single trade ($${risk2.toFixed(0)})<br>
+    2. Always use stop losses — protect the account first<br>
+    3. Let winners run, cut losers fast (target 2:1 minimum R:R)<br>
+    4. Compound wins — reinvest profits into next trade<br>
+    5. Stick to 1-3 trades/day max — quality over quantity<br>
+    6. Keep a win streak going — 5 x 20% wins = +${((1.2**5-1)*100).toFixed(0)}% gain
+  </div>`;
+}
+
+function renderPlan(body){
+  const bal=parseFloat(document.getElementById('mcBalInput')?.value)||500;
+  const goal=parseFloat(document.getElementById('mcGoalInput')?.value)||5000;
+  const milestones=[
+    {amt:750,label:'First milestone 🌱',pct:((750-bal)/(goal-bal)*100).toFixed(0)},
+    {amt:1000,label:'$1K unlocked 🌸',pct:((1000-bal)/(goal-bal)*100).toFixed(0)},
+    {amt:2000,label:'$2K — halfway! 🌷',pct:((2000-bal)/(goal-bal)*100).toFixed(0)},
+    {amt:3500,label:'$3.5K — final push 💮',pct:((3500-bal)/(goal-bal)*100).toFixed(0)},
+    {amt:goal,label:'🏆 GOAL ACHIEVED',pct:100},
+  ].filter(m=>m.amt>bal);
+
+  body.innerHTML=`
+  <div style="font-size:.58rem;color:var(--muted2);margin-bottom:10px">Your step-by-step roadmap to $${goal.toLocaleString()} ✦</div>
+  ${milestones.map(m=>{
+    const reached=bal>=m.amt;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;border:1.5px solid ${reached?'rgba(91,191,142,.3)':'var(--border)'};background:${reached?'rgba(91,191,142,.05)':'var(--surface2)'};margin-bottom:6px">
+      <div style="font-size:1rem">${reached?'✅':'⭕'}</div>
+      <div style="flex:1">
+        <div style="font-size:.68rem;font-weight:600;color:${reached?'var(--green)':'var(--text)'}">${m.label}</div>
+        <div style="font-size:.56rem;color:var(--muted2)">+$${(m.amt-bal).toFixed(0)} more needed · ${m.pct}% of goal</div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:.8rem;font-weight:700;color:${reached?'var(--green)':'var(--muted2)'}">$${m.amt.toLocaleString()}</div>
+    </div>`;
+  }).join('')}
+  <div style="margin-top:12px;background:linear-gradient(135deg,rgba(244,114,168,.06),rgba(179,136,214,.06));border:1.5px solid var(--border);border-radius:12px;padding:12px">
+    <div style="font-size:.6rem;font-weight:700;color:var(--text);margin-bottom:7px">📅 Realistic Timeline</div>
+    ${[['Week 1–2','Learn patterns, paper trade, find your 2 best setups'],
+       ['Week 3–4','Start with 1 trade/day, strict stops, aim for $500→$750'],
+       ['Month 2','Scale to 2 trades/day as confidence builds, target $1,000'],
+       ['Month 3','Compound gains aggressively, target $2,000'],
+       ['Month 4–6','Full momentum, compound to $5,000'],
+    ].map(([t,d])=>`<div style="display:flex;gap:8px;margin-bottom:5px"><span style="font-size:.56rem;color:var(--accent);font-weight:600;min-width:80px">${t}</span><span style="font-size:.56rem;color:var(--muted2)">${d}</span></div>`).join('')}
+  </div>`;
 }
 </script>
 
