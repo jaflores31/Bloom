@@ -803,25 +803,43 @@ let _fails=0,_off=false;
 // INIT
 // =====================================================================
 window.onload=()=>{
-  seedRealPrices();
-  renderTicker();renderSidebars();selectStock(STOCKS[0]);setMode('day');calcRR();
-  // Seed prevSignals so first tick doesn't spam alerts
-  STOCKS.forEach(s=>{prevSignals[s.sym]=s.signal;});
-  // Demo: fire a welcome alert after 3s to show the system works
-  setTimeout(()=>{fireAlert('NVDA','buy',cur.price,'Initial scan — ORB setup forming above VWAP');},3000);
-  setInterval(tick,3000);
-  loadAlpacaAssets();// preload full US stock list
-  // Pre-fetch technicals for top watchlist stocks
-  const topSyms=['NVDA','AAPL','TSLA','META','AMZN','MSFT','GOOGL','SPY','AMD'];
-  topSyms.forEach((sym,i)=>setTimeout(()=>updateSignalForStock(sym),i*1200));
-  // Live price fetch: on load + every 30s (Yahoo 15-min delayed refresh)
-  fetchLivePrices();
-  setInterval(fetchLivePrices,30000);
-  loadNews();
-  document.addEventListener('click',e=>{
-    const dd=document.getElementById('sdrop');
-    if(!dd.contains(e.target)&&!document.getElementById('hInput').contains(e.target))dd.style.display='none';
-  });
+  try{
+    // 1. Seed real prices FIRST before anything renders
+    seedRealPrices();
+    // 2. Set mode state before selectStock so MODES/curMode are ready
+    curMode='day';
+    curTfIdx=3;
+    // 3. Render UI
+    renderTicker();
+    renderSidebars();
+    // 4. Select stock (uses curMode which is now set)
+    selectStock(STOCKS[0]);
+    // 5. Now set mode UI (renders TF buttons, strip etc)
+    setMode('day');
+    calcRR();
+    // 6. Seed signal tracking
+    STOCKS.forEach(s=>{prevSignals[s.sym]=s.signal;});
+    // 7. Background tasks staggered to not block UI
+    setInterval(tick,3000);
+    setTimeout(()=>fetchLivePrices(),1000);
+    setInterval(fetchLivePrices,30000);
+    setTimeout(()=>loadNews(),2000);
+    setTimeout(()=>loadAlpacaAssets(),3000);
+    setTimeout(()=>fireAlert('NVDA','buy',cur.price,'Blossom ready — AI scanning markets'),4000);
+    // Pre-fetch technicals staggered
+    const topSyms=['NVDA','AAPL','TSLA','META','SPY'];
+    topSyms.forEach((sym,i)=>setTimeout(()=>updateSignalForStock(sym),5000+i*1500));
+    // Click outside closes dropdown
+    document.addEventListener('click',e=>{
+      try{
+        const dd=document.getElementById('sdrop');
+        const inp=document.getElementById('hInput');
+        if(dd&&inp&&!dd.contains(e.target)&&!inp.contains(e.target))dd.style.display='none';
+      }catch(e){}
+    });
+  }catch(err){
+    console.error('Init error:',err);
+  }
 };
 
 function renderTicker(){
@@ -1250,40 +1268,60 @@ let curMode='day';
 let curTfIdx=3;
 
 function setMode(mode){
-  curMode=mode;
-  curTfIdx=MODES[mode].defaultTf;
-  // Update tab buttons
-  document.getElementById('mDayBtn').classList.toggle('active',mode==='day');
-  document.getElementById('mSwingBtn').classList.toggle('active',mode==='swing');
-  // Update desc
-  document.getElementById('modeDesc').innerHTML=MODES[mode].desc;
-  // Update strip
-  const strip=document.getElementById('modeStrip');
-  strip.className='mode-strip'+(mode==='swing'?' sw':'');
-  strip.innerHTML=MODES[mode].strip.map(i=>`<div class="ms-item"><div class="ms-l">${i.l}</div><div class="ms-v" style="color:${mode==='day'?'var(--accent)':'var(--lavender)'}">${i.v}</div></div>`).join('');
-  // Build TF buttons
-  renderTfBtns();
-  // Update indicators for mode defaults
-  const m=MODES[mode];
-  aInd.vwap=m.vwap;aInd.ema=m.ema;aInd.bb=m.bb;
-  document.getElementById('indVwap').classList.toggle('on',m.vwap);
-  document.getElementById('indEma').classList.toggle('on',m.ema);
-  document.getElementById('indBb').classList.toggle('on',m.bb);
-  // Update panels for mode
-  renderModeSpecificPanels(cur,mode);
-  // Reload TradingView with new interval
-  loadTVChart(cur.sym);
-  // Update dynamic card titles
-  const orbT=document.getElementById('orbTitle');
-  if(orbT)orbT.innerHTML=mode==='swing'?'📅 Swing Targets':'🔔 ORB';
-  const timT=document.getElementById('timingTitle');
-  if(timT)timT.innerHTML=mode==='swing'?'📅 Best Days':'⏱ Entry Timing';
+  try{
+    curMode=mode;
+    curTfIdx=MODES[mode]?.defaultTf||3;
+    // Tab buttons
+    const dayBtn=document.getElementById('mDayBtn');
+    const swingBtn=document.getElementById('mSwingBtn');
+    if(dayBtn)dayBtn.classList.toggle('active',mode==='day');
+    if(swingBtn)swingBtn.classList.toggle('active',mode==='swing');
+    // Desc
+    const desc=document.getElementById('modeDesc');
+    if(desc)desc.innerHTML=MODES[mode]?.desc||'';
+    // Strip
+    const strip=document.getElementById('modeStrip');
+    if(strip){
+      strip.className='mode-strip'+(mode==='swing'?' sw':'');
+      strip.innerHTML=(MODES[mode]?.strip||[]).map(i=>`<div class="ms-item"><div class="ms-l">${i.l}</div><div class="ms-v" style="color:${mode==='day'?'var(--accent)':'var(--lavender)'}">${i.v}</div></div>`).join('');
+    }
+    // TF buttons
+    renderTfBtns();
+    // Indicators
+    const m=MODES[mode];
+    if(m){
+      aInd.vwap=m.vwap;aInd.ema=m.ema;aInd.bb=m.bb;
+      const vwapBtn=document.getElementById('indVwap');
+      const emaBtn=document.getElementById('indEma');
+      const bbBtn=document.getElementById('indBb');
+      if(vwapBtn)vwapBtn.classList.toggle('on',m.vwap);
+      if(emaBtn)emaBtn.classList.toggle('on',m.ema);
+      if(bbBtn)bbBtn.classList.toggle('on',m.bb);
+    }
+    // Panels
+    try{renderModeSpecificPanels(cur,mode);}catch(e){console.warn('panel err:',e);}
+    // TradingView
+    try{loadTVChart(cur.sym);}catch(e){}
+    // Card titles
+    const orbT=document.getElementById('orbTitle');
+    if(orbT)orbT.innerHTML=mode==='swing'?'📅 Swing Targets':'🔔 ORB';
+    const timT=document.getElementById('timingTitle');
+    if(timT)timT.innerHTML=mode==='swing'?'📅 Best Days':'⏱ Entry Timing';
+    // Recalculate signal
+    try{
+      showSignalLoading();
+      setTimeout(()=>updateSignalForStock(cur.sym,mode,MODES[mode].intervals[MODES[mode].defaultTf].lbl),200);
+    }catch(e){}
+  }catch(err){console.error('setMode error:',err);}
 }
 
 function renderTfBtns(){
-  const container=document.getElementById('tfBtns');
-  const intervals=MODES[curMode].intervals;
-  container.innerHTML=intervals.map((tf,i)=>`<button class="tf${i===curTfIdx?' active':''}" onclick="selectTf(${i})">${tf.lbl}</button>`).join('');
+  try{
+    const container=document.getElementById('tfBtns');
+    if(!container)return;
+    const intervals=MODES[curMode]?.intervals||[];
+    container.innerHTML=intervals.map((tf,i)=>`<button class="tf${i===curTfIdx?' active':''}" onclick="selectTf(${i})">${tf.lbl}</button>`).join('');
+  }catch(e){console.warn('renderTfBtns:',e);}
 }
 
 function selectTf(idx){
@@ -2322,55 +2360,72 @@ function updateCurrentDisplay(){
 let tvWidget=null;
 let tvScriptLoaded=false;
 
-function loadTVScript(cb){
-  if(tvScriptLoaded){cb();return;}
-  const s=document.createElement('script');
-  s.src='https://s3.tradingview.com/tv.js';
-  s.onload=()=>{tvScriptLoaded=true;cb();};
-  s.onerror=()=>{showFallbackCanvas();};
-  document.head.appendChild(s);
-}
-
 function loadTVChart(sym){
   const container=document.getElementById('tvChart');
   const loading=document.getElementById('tvLoading');
-  if(!container)return;
-  // Map intervals
-  const tvInterval=()=>{
-    const tf=MODES[curMode].intervals[curTfIdx].lbl;
-    const map={'1M':'1','2M':'2','3M':'3','5M':'5','10M':'10','15M':'15','30M':'30','1H':'60','2H':'120','4H':'240','1D':'D','2D':'3D','1W':'W','1M':'M'};
-    return map[tf]||'5';
+  if(!container||!sym)return;
+  // Map TF label to TradingView interval
+  const getTVInterval=()=>{
+    try{
+      const tf=MODES[curMode]?.intervals[curTfIdx]?.lbl||'5M';
+      const map={'1M':'1','2M':'2','3M':'3','5M':'5','10M':'10','15M':'15','30M':'30',
+                 '1H':'60','2H':'120','4H':'240','1D':'D','2D':'3D','1W':'W'};
+      return map[tf]||'5';
+    }catch(e){return'5';}
   };
+  // Show loading state
+  if(loading)loading.style.display='flex';
   loadTVScript(()=>{
     try{
       container.innerHTML='';
       if(loading)loading.style.display='none';
-      // TradingView widget
+      // Use the advanced chart widget (more compatible)
       new TradingView.widget({
-        container_id:'tvChart',
+        autosize:true,
         symbol:`NASDAQ:${sym}`,
-        interval:tvInterval(),
+        interval:getTVInterval(),
         timezone:'America/New_York',
         theme:'light',
         style:'1',
         locale:'en',
-        toolbar_bg:'#fff8fb',
         enable_publishing:false,
-        allow_symbol_change:false,
+        allow_symbol_change:true,
+        container_id:'tvChart',
+        hide_side_toolbar:true,
+        withdateranges:true,
         save_image:false,
-        hide_side_toolbar:false,
-        studies:curMode==='day'?['VWAP@tv-basicstudies','MASimple@tv-basicstudies']:['BB@tv-basicstudies','MASimple@tv-basicstudies'],
+        details:false,
+        hotlist:false,
+        calendar:false,
+        studies:curMode==='day'?
+          ['VWAP@tv-basicstudies','MASimple@tv-basicstudies']:
+          ['BB@tv-basicstudies','MASimple@tv-basicstudies'],
         width:'100%',
         height:340,
-        autosize:true,
-        hide_legend:false,
-        withdateranges:true,
-        show_popup_button:true,
-        popup_width:'1000',
-        popup_height:'650',
       });
-    }catch(e){showFallbackCanvas();}
+    }catch(e){
+      console.warn('TradingView failed:',e);
+      showFallbackCanvas();
+    }
   });
+}
+
+function loadTVScript(cb){
+  if(tvScriptLoaded){cb();return;}
+  // Try both CDN options
+  const s=document.createElement('script');
+  s.src='https://s3.tradingview.com/tv.js';
+  s.async=true;
+  s.onload=()=>{tvScriptLoaded=true;cb();};
+  s.onerror=()=>{
+    // Fallback to alternate URL
+    const s2=document.createElement('script');
+    s2.src='https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    s2.onload=()=>{tvScriptLoaded=true;cb();};
+    s2.onerror=()=>showFallbackCanvas();
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s);
 }
 
 function showFallbackCanvas(){
