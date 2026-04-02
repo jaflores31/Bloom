@@ -191,7 +191,8 @@ main{overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
 .aib{padding:11px 12px;background:linear-gradient(135deg,rgba(244,114,168,.05),rgba(179,136,214,.05));border:1.5px solid var(–border);border-radius:11px;font-size:.67rem;line-height:1.75;position:relative;overflow:hidden;}
 .aib::before{content:’’;position:absolute;top:0;left:0;right:0;height:2.5px;background:linear-gradient(90deg,var(–accent),var(–lavender),var(–pink));}
 /* RIGHT SIDEBAR */
-.sr{border-left:1.5px solid var(–border);display:flex;flex-direction:column;background:rgba(255,248,251,.97);overflow-y:auto;}
+.sr{border-left:1.5px solid var(–border);display:flex;flex-direction:column;background:rgba(255,248,251,.97);overflow:hidden;}
+#srBody{overflow-y:auto;flex:1;}
 .gni{padding:10px 13px;border-bottom:1.5px solid var(–border);}
 .gimp{display:inline-flex;align-items:center;gap:4px;font-size:.5rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:20px;margin-bottom:5px;}
 .gimp.bull{background:rgba(91,191,142,.12);color:var(–green);border:1px solid rgba(91,191,142,.3);}
@@ -407,7 +408,7 @@ MISSION CONTROL — $500 → $5000
         <div id="hSigBox" style="margin-top:7px;"></div>
       </div>
       <div style="text-align:right;">
-        <div class="h-price" id="hPrice">$876.42</div>
+        <div class="h-price" id="hPrice">$175.79</div>
         <div class="h-chg" id="hChg"></div>
       </div>
     </div>
@@ -498,31 +499,13 @@ MISSION CONTROL — $500 → $5000
 
   <!-- RIGHT SIDEBAR -->
 
-  <aside class="sr">
-    <!-- ALERT LOG -->
-    <div class="al-panel" id="alertPanel">
-      <div class="al-header">
-        <span class="al-hdr-title">🔔 Signal Alerts</span>
-        <div style="display:flex;gap:5px;align-items:center">
-          <button class="al-clear" onclick="clearAlerts()">Clear all</button>
-          <button class="al-clear" onclick="toggleAlertPanel()" style="font-size:.7rem;padding:1px 6px">−</button>
-        </div>
-      </div>
-      <div class="al-settings">
-        <label class="al-tog"><input type="checkbox" id="togPush" onchange="requestPush()"> Push</label>
-        <label class="al-tog"><input type="checkbox" id="togSound" checked> Sound</label>
-        <label class="al-tog"><input type="checkbox" id="togBuy" checked> Buy</label>
-        <label class="al-tog"><input type="checkbox" id="togSell" checked> Sell</label>
-        <label class="al-tog"><input type="checkbox" id="togWatch"> Watch</label>
-      </div>
-      <div class="al-list" id="alertList"><div class="al-empty">✿ No alerts yet — monitoring signals…</div></div>
+  <aside class="sr" style="display:flex;flex-direction:column;overflow:hidden;">
+    <div style="display:flex;border-bottom:2px solid var(--border);background:var(--surface2);flex-shrink:0;">
+      <button onclick="switchSrTab('news')" id="stNews" style="flex:1;padding:8px 2px;border:none;border-bottom:2.5px solid var(--accent);background:transparent;font-family:'DM Sans',sans-serif;font-size:.56rem;font-weight:600;color:var(--accent);cursor:pointer;margin-bottom:-2px;">🌍 News</button>
+      <button onclick="switchSrTab('fx')" id="stFx" style="flex:1;padding:8px 2px;border:none;border-bottom:2.5px solid transparent;background:transparent;font-family:'DM Sans',sans-serif;font-size:.56rem;font-weight:600;color:var(--muted2);cursor:pointer;margin-bottom:-2px;">💱 Forex</button>
+      <button onclick="switchSrTab('alerts')" id="stAlerts" style="flex:1;padding:8px 2px;border:none;border-bottom:2.5px solid transparent;background:transparent;font-family:'DM Sans',sans-serif;font-size:.56rem;font-weight:600;color:var(--muted2);cursor:pointer;margin-bottom:-2px;">🔔 Alerts</button>
     </div>
-    <!-- GLOBAL NEWS -->
-    <div style="padding:10px 13px 5px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
-      <span style="font-size:.58rem;letter-spacing:.15em;color:var(--muted);text-transform:uppercase;font-weight:600">🌍 Global News</span>
-      <button class="ref-btn" style="margin:0;width:auto;padding:3px 9px;font-size:.56rem" onclick="loadNews()">↻</button>
-    </div>
-    <div id="gnFeed"><div class="loading"><div class="spin"></div>Loading…</div></div>
+    <div id="srBody" style="overflow-y:auto;flex:1;"><div class="loading"><div class="spin"></div>Loading…</div></div>
   </aside>
 </div>
 
@@ -530,10 +513,10 @@ MISSION CONTROL — $500 → $5000
 
 <div class="mo" id="sMo" onclick="closeMo('sMo',event)">
   <div class="md">
-    <div class="mt">✿ Search Any Stock</div>
+    <div class="mt">✿ Search Any Market</div>
     <div class="msub">Type a ticker or company — NYSE, NASDAQ, ETFs. Press Enter or tap Search.</div>
     <div class="msr">
-      <input id="mInput" type="text" placeholder="e.g. TSLA, Amazon, Gold…"
+      <input id="mInput" type="text" placeholder="MSTR, EUR/USD, Gold, BTC, AAPL…"
         oninput="filterMo(this.value)"
         onkeydown="if(event.key==='Enter'){aiSearch();event.preventDefault();}"/>
       <button onclick="aiSearch()">Search ✦</button>
@@ -607,7 +590,7 @@ MISSION CONTROL — $500 → $5000
 // STOCK UNIVERSE
 // =====================================================================
 const ALL=[
-  {sym:'NVDA',name:'NVIDIA Corporation',sector:'Chips',price:876.42,chg:0.82,signal:'buy'},
+  {sym:'NVDA',name:'NVIDIA Corporation',sector:'Chips',price:175.79,chg:-0.01,signal:'watch'},
   {sym:'AAPL',name:'Apple Inc',sector:'Tech',price:223.19,chg:-0.44,signal:'watch'},
   {sym:'MSFT',name:'Microsoft Corporation',sector:'Tech',price:387.60,chg:-0.21,signal:'watch'},
   {sym:'GOOGL',name:'Alphabet Inc',sector:'Tech',price:163.72,chg:0.95,signal:'watch'},
@@ -628,10 +611,10 @@ const ALL=[
   {sym:'CRM',name:'Salesforce Inc',sector:'Tech',price:271.30,chg:-0.30,signal:'watch'},
   {sym:'NOW',name:'ServiceNow Inc',sector:'Tech',price:897.50,chg:1.80,signal:'buy'},
   {sym:'ADBE',name:'Adobe Inc',sector:'Tech',price:384.20,chg:-1.20,signal:'sell'},
-  {sym:'SNOW',name:'Snowflake Inc',sector:'Tech',price:128.40,chg:2.10,signal:'buy'},,
+  {sym:'SNOW',name:'Snowflake Inc',sector:'Tech',price:128.40,chg:2.10,signal:'buy'},
   {sym:'PLTR',name:'Palantir Technologies',sector:'AI',price:91.20,chg:4.30,signal:'buy'},
   {sym:'AI',name:'C3.ai Inc',sector:'AI',price:24.10,chg:5.60,signal:'buy'},
-  {sym:'SHOP',name:'Shopify Inc',sector:'Tech',price:104.30,chg:1.40,signal:'watch'},,
+  {sym:'SHOP',name:'Shopify Inc',sector:'Tech',price:104.30,chg:1.40,signal:'watch'},
   {sym:'UBER',name:'Uber Technologies',sector:'Tech',price:74.80,chg:0.90,signal:'buy'},
   {sym:'LYFT',name:'Lyft Inc',sector:'Tech',price:14.20,chg:-1.80,signal:'sell'},
   {sym:'SNAP',name:'Snap Inc',sector:'Tech',price:13.40,chg:-3.20,signal:'sell'},
@@ -646,38 +629,38 @@ const ALL=[
   {sym:'V',name:'Visa Inc',sector:'Finance',price:281.90,chg:0.65,signal:'buy'},
   {sym:'MA',name:'Mastercard Inc',sector:'Finance',price:472.30,chg:0.42,signal:'buy'},
   {sym:'PYPL',name:'PayPal Holdings',sector:'Finance',price:62.10,chg:-1.30,signal:'sell'},
-  {sym:'SQ',name:'Block Inc',sector:'Finance',price:54.40,chg:2.10,signal:'buy'},,
+  {sym:'SQ',name:'Block Inc',sector:'Finance',price:54.40,chg:2.10,signal:'buy'},
   {sym:'COIN',name:'Coinbase Global',sector:'Crypto',price:182.40,chg:-4.10,signal:'sell'},
   {sym:'HOOD',name:'Robinhood Markets',sector:'Finance',price:41.80,chg:3.40,signal:'buy'},
   {sym:'SCHW',name:'Charles Schwab',sector:'Finance',price:72.30,chg:0.18,signal:'watch'},
   {sym:'BLK',name:'BlackRock Inc',sector:'Finance',price:878.20,chg:0.44,signal:'buy'},
   {sym:'JNJ',name:'Johnson & Johnson',sector:'Health',price:158.40,chg:0.12,signal:'watch'},
-  {sym:'LLY',name:'Eli Lilly',sector:'Health',price:819.40,chg:1.80,signal:'buy'},,
+  {sym:'LLY',name:'Eli Lilly',sector:'Health',price:819.40,chg:1.80,signal:'buy'},
   {sym:'NVO',name:'Novo Nordisk',sector:'Health',price:90.30,chg:-0.60,signal:'watch'},
   {sym:'MRNA',name:'Moderna Inc',sector:'Health',price:33.40,chg:-2.10,signal:'sell'},
   {sym:'PFE',name:'Pfizer Inc',sector:'Health',price:25.80,chg:-0.90,signal:'sell'},
   {sym:'ABBV',name:'AbbVie Inc',sector:'Health',price:178.30,chg:0.44,signal:'watch'},
   {sym:'UNH',name:'UnitedHealth Group',sector:'Health',price:283.40,chg:0.28,signal:'watch'},
   {sym:'ISRG',name:'Intuitive Surgical',sector:'Health',price:418.80,chg:1.30,signal:'buy'},
-  {sym:'DXCM',name:'Dexcom Inc',sector:'Health',price:71.40,chg:2.10,signal:'buy'},,
+  {sym:'DXCM',name:'Dexcom Inc',sector:'Health',price:71.40,chg:2.10,signal:'buy'},
   {sym:'XOM',name:'Exxon Mobil',sector:'Energy',price:112.40,chg:0.78,signal:'watch'},
   {sym:'CVX',name:'Chevron Corporation',sector:'Energy',price:151.20,chg:0.32,signal:'watch'},
   {sym:'OXY',name:'Occidental Petroleum',sector:'Energy',price:48.20,chg:1.10,signal:'buy'},
   {sym:'NEE',name:'NextEra Energy',sector:'Energy',price:70.80,chg:-0.30,signal:'watch'},
   {sym:'FSLR',name:'First Solar',sector:'Energy',price:155.30,chg:2.80,signal:'buy'},
-  {sym:'ENPH',name:'Enphase Energy',sector:'Energy',price:74.40,chg:-3.20,signal:'sell'},,
-  {sym:'WMT',name:'Walmart Inc',sector:'Consumer',price:94.40,chg:0.22,signal:'watch'},,
+  {sym:'ENPH',name:'Enphase Energy',sector:'Energy',price:74.40,chg:-3.20,signal:'sell'},
+  {sym:'WMT',name:'Walmart Inc',sector:'Consumer',price:94.40,chg:0.22,signal:'watch'},
   {sym:'COST',name:'Costco Wholesale',sector:'Consumer',price:918.30,chg:0.58,signal:'buy'},
   {sym:'TGT',name:'Target Corporation',sector:'Consumer',price:101.20,chg:-1.10,signal:'sell'},
   {sym:'HD',name:'Home Depot',sector:'Consumer',price:352.40,chg:0.34,signal:'watch'},
   {sym:'NKE',name:'Nike Inc',sector:'Consumer',price:64.30,chg:-0.88,signal:'sell'},
   {sym:'LULU',name:'Lululemon Athletica',sector:'Consumer',price:241.40,chg:2.30,signal:'buy'},
-  {sym:'SBUX',name:'Starbucks Corp',sector:'Consumer',price:84.20,chg:-1.40,signal:'sell'},,
+  {sym:'SBUX',name:'Starbucks Corp',sector:'Consumer',price:84.20,chg:-1.40,signal:'sell'},
   {sym:'MCD',name:"McDonald's Corp",sector:'Consumer',price:281.40,chg:0.22,signal:'watch'},
-  {sym:'ABNB',name:'Airbnb Inc',sector:'Consumer',price:131.30,chg:1.80,signal:'buy'},,
+  {sym:'ABNB',name:'Airbnb Inc',sector:'Consumer',price:131.30,chg:1.80,signal:'buy'},
   {sym:'BKNG',name:'Booking Holdings',sector:'Consumer',price:4842.40,chg:1.10,signal:'buy'},
-  {sym:'SPY',name:'S&P 500 ETF Trust',sector:'ETF',price:523.90,chg:0.38,signal:'buy'},
-  {sym:'QQQ',name:'Invesco QQQ Trust',sector:'ETF',price:448.20,chg:0.72,signal:'buy'},
+  {sym:'SPY',name:'S&P 500 ETF Trust',sector:'ETF',price:536.90,chg:0.38,signal:'buy'},
+  {sym:'QQQ',name:'Invesco QQQ Trust',sector:'ETF',price:450.20,chg:0.72,signal:'buy'},
   {sym:'IWM',name:'iShares Russell 2000',sector:'ETF',price:196.40,chg:-0.21,signal:'watch'},
   {sym:'GLD',name:'SPDR Gold Trust',sector:'ETF',price:241.40,chg:0.55,signal:'buy'},
   {sym:'SLV',name:'iShares Silver Trust',sector:'ETF',price:24.80,chg:1.20,signal:'buy'},
@@ -796,6 +779,47 @@ const ALL=[
 // STATE
 // =====================================================================
 let STOCKS=[...ALL];
+
+// ═══ FOREX / CURRENCY UNIVERSE ═══
+window.FOREX=window.FOREX||[];window.FOREX=[
+  {pair:'EUR/USD',name:'Euro / US Dollar',rate:1.0842,chg:0.12,signal:'buy',desc:'Most traded pair'},
+  {pair:'GBP/USD',name:'British Pound / USD',rate:1.2934,chg:-0.08,signal:'sell',desc:'The Cable'},
+  {pair:'USD/JPY',name:'US Dollar / Yen',rate:149.82,chg:0.22,signal:'buy',desc:'Yen carry trade'},
+  {pair:'USD/CHF',name:'US Dollar / Franc',rate:0.9012,chg:-0.14,signal:'sell',desc:'Safe haven'},
+  {pair:'AUD/USD',name:'Australian Dollar / USD',rate:0.6384,chg:0.18,signal:'buy',desc:'Risk-on proxy'},
+  {pair:'USD/CAD',name:'US Dollar / CAD',rate:1.3642,chg:0.09,signal:'watch',desc:'Oil linked'},
+  {pair:'NZD/USD',name:'New Zealand Dollar / USD',rate:0.5892,chg:0.21,signal:'buy',desc:'Kiwi'},
+  {pair:'EUR/JPY',name:'Euro / Japanese Yen',rate:162.42,chg:0.34,signal:'buy',desc:'High vol cross'},
+  {pair:'GBP/JPY',name:'British Pound / Yen',rate:193.84,chg:0.28,signal:'buy',desc:'The Dragon'},
+  {pair:'EUR/GBP',name:'Euro / British Pound',rate:0.8382,chg:-0.06,signal:'watch',desc:'EU cross'},
+  {pair:'USD/MXN',name:'US Dollar / Peso',rate:17.24,chg:-0.42,signal:'sell',desc:'EM pair'},
+  {pair:'XAU/USD',name:'Gold Spot / USD',rate:2318.40,chg:0.55,signal:'buy',desc:'Gold price'},
+  {pair:'XAG/USD',name:'Silver Spot / USD',rate:27.84,chg:1.20,signal:'buy',desc:'Silver price'},
+  {pair:'BTC/USD',name:'Bitcoin / USD',rate:84200,chg:3.20,signal:'buy',desc:'Bitcoin'},
+  {pair:'ETH/USD',name:'Ethereum / USD',rate:1842,chg:2.40,signal:'buy',desc:'Ethereum'},
+  {pair:'USD/BRL',name:'US Dollar / Real',rate:5.02,chg:0.18,signal:'watch',desc:'Brazil EM'},
+];
+
+// ════ FOREX / CURRENCY PAIRS ════
+const FOREX=[
+  {pair:'EUR/USD',name:'Euro / US Dollar',rate:1.0842,chg:0.12,signal:'buy',desc:'Most traded'},
+  {pair:'GBP/USD',name:'British Pound / Dollar',rate:1.2934,chg:-0.08,signal:'sell',desc:'The Cable'},
+  {pair:'USD/JPY',name:'Dollar / Japanese Yen',rate:149.82,chg:0.22,signal:'buy',desc:'Carry trade'},
+  {pair:'USD/CHF',name:'Dollar / Swiss Franc',rate:0.9012,chg:-0.14,signal:'sell',desc:'Safe haven'},
+  {pair:'AUD/USD',name:'Australian Dollar / USD',rate:0.6384,chg:0.18,signal:'buy',desc:'Risk-on'},
+  {pair:'USD/CAD',name:'Dollar / Canadian Dollar',rate:1.3642,chg:0.09,signal:'watch',desc:'Oil linked'},
+  {pair:'NZD/USD',name:'New Zealand Dollar / USD',rate:0.5892,chg:0.21,signal:'buy',desc:'Kiwi'},
+  {pair:'EUR/JPY',name:'Euro / Japanese Yen',rate:162.42,chg:0.34,signal:'buy',desc:'High vol cross'},
+  {pair:'GBP/JPY',name:'British Pound / Yen',rate:193.84,chg:0.28,signal:'buy',desc:'The Dragon'},
+  {pair:'EUR/GBP',name:'Euro / British Pound',rate:0.8382,chg:-0.06,signal:'watch',desc:'EU cross'},
+  {pair:'USD/MXN',name:'Dollar / Mexican Peso',rate:17.24,chg:-0.42,signal:'sell',desc:'EM pair'},
+  {pair:'XAU/USD',name:'Gold Spot / Dollar',rate:2318.40,chg:0.55,signal:'buy',desc:'Gold'},
+  {pair:'XAG/USD',name:'Silver Spot / Dollar',rate:27.84,chg:1.20,signal:'buy',desc:'Silver'},
+  {pair:'BTC/USD',name:'Bitcoin / Dollar',rate:84200,chg:3.20,signal:'buy',desc:'Bitcoin'},
+  {pair:'ETH/USD',name:'Ethereum / Dollar',rate:1842,chg:2.40,signal:'buy',desc:'Ethereum'},
+  {pair:'USD/BRL',name:'Dollar / Brazilian Real',rate:5.02,chg:0.18,signal:'watch',desc:'Brazil EM'},
+];
+
 let favs=[];
 try{favs=JSON.parse(localStorage.getItem('bfavs')||'["NVDA","AAPL","SPY"]');}catch(e){favs=["NVDA","AAPL","SPY"];}
 let wlSyms=['NVDA','AAPL','TSLA','META','AMZN','MSFT','GOOGL','SPY','AMD','COIN','PLTR','CRWD','LLY','NFLX','GLD','COST'];
@@ -1615,15 +1639,85 @@ const NF=[
   {headline:'AI chip export rules tightened — advanced GPUs targeted',source:'WSJ',time:'5h ago',impact:'bear',summary:'Direct headwind for NVIDIA and AMD China data center revenue.',affected:['NVDA','AMD','AVGO','ASML','TSM']},
   {headline:'Apple approved for expanded India iPhone sales',source:'Bloomberg',time:'6h ago',impact:'bull',summary:'India expansion unlocks 1.4B consumers. Positive for entire supply chain.',affected:['AAPL','QCOM','AVGO','MU']},
 ];
+// ═══ RIGHT SIDEBAR TABS ═══
+let _srTab='news';
+function switchSrTab(tab,btn){
+  _srTab=tab;
+  ['srTabNews','srTabFx','srTabAlerts'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.style.borderBottomColor=el.id==='srTab'+tab.charAt(0).toUpperCase()+tab.slice(1)?'var(--accent)':'transparent';el.style.color=el.id==='srTab'+tab.charAt(0).toUpperCase()+tab.slice(1)?'var(--accent)':'var(--muted2)';}
+  });
+  if(tab==='news')loadNews();
+  else if(tab==='fx')renderFxPanel();
+  else if(tab==='alerts')renderAlertsPanel();
+}
+function initSrPanel(){loadNews();}
+
+function renderFxPanel(){
+  const body=document.getElementById('srBody');
+  if(!body)return;
+  const pairs=window.FOREX||[];
+  if(!pairs.length){body.innerHTML='<div style="padding:12px;font-size:.62rem;color:var(--muted2)">Forex data loading…</div>';return;}
+  body.innerHTML='<div style="padding:7px 12px 4px;font-size:.52rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600">💱 Forex · Crypto · Commodities</div>'+
+  pairs.map(fx=>{
+    const neg=fx.chg<0,sc=fx.signal==='buy'?'var(--green)':fx.signal==='sell'?'var(--red)':'var(--yellow)';
+    const dec=fx.pair.includes('JPY')||fx.pair.includes('BTC')||fx.pair.includes('XAU')||fx.pair.includes('ETH')?2:4;
+    return`<div onclick="selectForex('${fx.pair}')" style="padding:8px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s" onmouseover="this.style.background='rgba(244,114,168,.05)'" onmouseout="this.style.background='transparent'">
+      <div><div style="font-size:.76rem;font-weight:700;font-family:'DM Mono',monospace">${fx.pair}</div><div style="font-size:.54rem;color:var(--muted2)">${fx.name}</div></div>
+      <div style="text-align:right"><div style="font-size:.8rem;font-family:'DM Mono',monospace;font-weight:600;color:${neg?'var(--red)':'var(--green)'}">${fx.rate.toFixed(dec)}</div>
+      <div style="font-size:.58rem;font-family:'DM Mono',monospace;color:${neg?'var(--red)':'var(--green)'}">${neg?'':'+'}${fx.chg.toFixed(2)}%</div>
+      <div style="font-size:.5rem;font-weight:700;color:${sc}">${fx.signal==='buy'?'LONG':fx.signal==='sell'?'SHORT':'NEUTRAL'}</div></div>
+    </div>`;
+  }).join('');
+}
+
+function renderAlertsPanel(){
+  const body=document.getElementById('srBody');
+  if(!body)return;
+  body.innerHTML='<div style="padding:8px 12px 5px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)"><span style="font-size:.54rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600">🔔 Signal Alerts</span><button onclick="alertLog=[];renderAlertsPanel()" style="background:none;border:1px solid var(--border);padding:1px 7px;border-radius:6px;font-size:.54rem;color:var(--muted2);cursor:pointer">Clear</button></div>'+
+  '<div style="padding:6px 12px 5px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--border)"><label style="display:flex;gap:3px;align-items:center;font-size:.54rem;color:var(--muted2);cursor:pointer"><input type="checkbox" id="togSound" checked> Sound</label><label style="display:flex;gap:3px;align-items:center;font-size:.54rem;color:var(--muted2);cursor:pointer"><input type="checkbox" id="togPush" onchange="reqPush()"> Push</label><label style="display:flex;gap:3px;align-items:center;font-size:.54rem;color:var(--muted2);cursor:pointer"><input type="checkbox" id="togBuy" checked> Buy</label><label style="display:flex;gap:3px;align-items:center;font-size:.54rem;color:var(--muted2);cursor:pointer"><input type="checkbox" id="togSell" checked> Sell</label></div>'+
+  (alertLog.length?alertLog.slice().reverse().map(a=>`<div style="padding:6px 11px;border-bottom:1px solid rgba(242,214,228,.3);display:flex;gap:6px;align-items:flex-start"><div style="width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px;background:${a.signal==='buy'?'var(--green)':a.signal==='sell'?'var(--red)':'var(--yellow)'}"></div><div><div style="display:flex;align-items:center;gap:4px"><span style="font-size:.72rem;font-weight:700">${a.sym}</span><span style="font-size:.5rem;font-weight:700;padding:1px 5px;border-radius:5px;background:${a.signal==='buy'?'rgba(91,191,142,.1)':'rgba(232,84,122,.08)'};color:${a.signal==='buy'?'var(--green)':'var(--red)'];border:1px solid ${a.signal==='buy'?'rgba(91,191,142,.3)':'rgba(232,84,122,.25)'}">${a.signal.toUpperCase()}</span><span style="font-size:.64rem;font-family:'DM Mono',monospace">$${a.price}</span></div><div style="font-size:.55rem;color:var(--muted2)">${a.reason}</div><div style="font-size:.49rem;color:var(--muted)">${a.time}</div></div></div>`).join(''):'<div style="padding:20px;text-align:center;font-size:.62rem;color:var(--muted)">✿ No alerts yet</div>');
+}
+
+function selectForex(pair){
+  const fx=(window.FOREX||[]).find(f=>f.pair===pair);
+  if(!fx)return;
+  document.getElementById('hSym').textContent=fx.pair;
+  document.getElementById('hCo').textContent=fx.name+' · Forex';
+  const neg=fx.chg<0;
+  const dec=fx.pair.includes('JPY')||fx.pair.includes('BTC')||fx.pair.includes('XAU')||fx.pair.includes('ETH')?2:4;
+  const priceEl=document.getElementById('hPrice');
+  if(priceEl){priceEl.textContent=fx.rate.toFixed(dec);priceEl.className='h-price '+(neg?'red':'green');}
+  const chgEl=document.getElementById('hChg');
+  if(chgEl)chgEl.innerHTML=`<span class="${neg?'red':'green'}">${neg?'':'+'}${fx.chg.toFixed(2)}% today</span>`;
+  const tvSym=fx.pair.replace('/','');
+  const frame=document.getElementById('tvFrame')||document.getElementById('tvChart');
+  if(frame){
+    const fxMap={'XAUUSD':'OANDA:XAUUSD','XAGUSD':'OANDA:XAGUSD','BTCUSD':'BITSTAMP:BTCUSD','ETHUSD':'BITSTAMP:ETHUSD'};
+    const tvPair=fxMap[tvSym]||`FX:${tvSym}`;
+    if(frame.tagName==='IFRAME'){
+      frame.src=`https://s.tradingview.com/widgetembed/?frameElementId=tvFrame&symbol=${tvPair}&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=fff8fb&theme=light&style=1&timezone=America%2FNew_York&withdateranges=1&locale=en`;
+    }
+  }
+  const col=fx.signal==='buy'?'var(--green)':fx.signal==='sell'?'var(--red)':'var(--yellow)';
+  const sigBox=document.getElementById('hSigBox');
+  if(sigBox)sigBox.innerHTML=`<div class="sig-box ${fx.signal}" style="display:inline-flex;gap:8px;align-items:center;padding:7px 12px;border-radius:12px;border:1.5px solid;margin-top:6px">
+    <div style="font-size:1.1rem">💱</div>
+    <div><div style="font-size:.52rem;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase">Forex Signal</div>
+    <div style="font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700;color:${col}">${fx.signal==='buy'?'LONG':fx.signal==='sell'?'SHORT':'NEUTRAL'}</div>
+    <div style="font-size:.6rem;color:${col}">${fx.desc}</div></div>
+  </div>`;
+}
+
 async function loadNews(){
-  document.getElementById('gnFeed').innerHTML='<div class="loading"><div class="spin"></div>Loading…</div>';
+  document.getElementById('srBody').innerHTML='<div class="loading"><div class="spin"></div>Loading…</div>';
   let news;
   if(!_off){
     const r=await claude('Generate 6 realistic global macro news items affecting stock markets today (April 2026). JSON array. Each: {headline,source,time,impact(bull/bear/mixed),summary(1-2 sentences),affected(4-5 tickers)}. ONLY JSON.',12000);
     if(r.ok){try{news=JSON.parse(r.text.replace(/```json|```/g,'').trim());}catch(e){}}
   }
   if(!news)news=NF;
-  document.getElementById('gnFeed').innerHTML=news.slice(0,8).map(n=>`<div class="gni">
+  document.getElementById('srBody').innerHTML=document.getElementById('gnFeed').innerHTML=news.slice(0,8).map(n=>`<div class="gni">
     <div class="gimp ${n.impact}">${n.impact==='bull'?'📈 Bullish':n.impact==='bear'?'📉 Bearish':'⚖️ Mixed'}</div>
     <div class="ghl">${n.headline}</div>
     <div class="gsum">${n.summary||''}</div>
@@ -1806,7 +1900,7 @@ const ALPACA_BASE='https://data.alpaca.markets/v2';
 
 // ── Real prices April 1, 2026 market open ──
 const REAL_PRICES={
-  NVDA:876.42,AAPL:223.19,MSFT:387.60,GOOGL:163.72,META:578.37,AMZN:197.12,
+  NVDA:175.79,AAPL:202.52,MSFT:378.85,GOOGL:155.20,META:578.37,AMZN:186.40,
   TSLA:252.34,AMD:102.18,INTC:21.44,AVGO:189.55,QCOM:158.90,TSM:172.80,
   MU:91.42,AMAT:158.30,ARM:115.60,ASML:692.40,SMCI:36.88,ORCL:162.44,
   CRM:271.30,NOW:897.50,ADBE:384.20,SNOW:128.40,PLTR:91.20,AI:24.10,
@@ -1860,31 +1954,58 @@ function seedRealPrices(){
 }
 
 // ── Fetch real price via Yahoo Finance proxy (most reliable from browser) ──
+// FINNHUB API - free tier, works directly from browser (no proxy needed)
+const FINNHUB_KEY='d0emq3hr01qgsfo8v2vgd0emq3hr01qgsfo8v2vg'; // free public demo key
+
+async function fetchFinnhub(sym){
+  try{
+    const res=await fetch(
+      `https://finnhub.io/api/v1/quote?symbol=${sym}&token=${FINNHUB_KEY}`,
+      {signal:AbortSignal.timeout(5000)}
+    );
+    if(!res.ok)throw new Error('finnhub fail');
+    const d=await res.json();
+    if(d.c&&d.c>0){
+      const chgPct=d.pc?((d.c-d.pc)/d.pc*100):0;
+      return{price:d.c,prevClose:d.pc||d.c,chgPct,source:'Finnhub'};
+    }
+  }catch(e){}
+  return null;
+}
+
 async function fetchYahooSingle(sym){
-  // Try multiple proxies and endpoints
-  const proxies=[
-    `https://api.allorigins.win/get?url=${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`)}`,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(`https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`)}`,
-    `https://corsproxy.io/?${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`)}`,
+  // 1. Try Finnhub first (no proxy needed, works everywhere)
+  const fh=await fetchFinnhub(sym);
+  if(fh)return fh;
+  // 2. Try Yahoo via multiple proxies
+  const urls=[
+    `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`,
+    `https://query2.finance.yahoo.com/v8/finance/chart/${sym}?interval=1m&range=1d`,
   ];
-  for(const proxy of proxies){
-    try{
-      const res=await fetch(proxy,{signal:AbortSignal.timeout(6000)});
-      if(!res.ok)continue;
-      const text=await res.text();
-      const json=JSON.parse(text);
-      // allorigins wraps in .contents, corsproxy returns direct
-      const raw=json.contents?JSON.parse(json.contents):json;
-      const meta=raw?.chart?.result?.[0]?.meta;
-      if(meta?.regularMarketPrice&&meta.regularMarketPrice>0){
-        return{
-          price:meta.regularMarketPrice,
-          prevClose:meta.chartPreviousClose||meta.regularMarketPrice,
-          chgPct:meta.regularMarketChangePercent||0,
-          source:proxy.includes('allorigins')?'Yahoo/AllOrigins':'Yahoo/CORSProxy'
-        };
-      }
-    }catch(e){continue;}
+  const proxyBases=[
+    'https://api.allorigins.win/get?url=',
+    'https://corsproxy.io/?',
+    'https://api.codetabs.com/v1/proxy?quest=',
+  ];
+  for(const base of proxyBases){
+    for(const url of urls){
+      try{
+        const res=await fetch(base+encodeURIComponent(url),{signal:AbortSignal.timeout(5000)});
+        if(!res.ok)continue;
+        const text=await res.text();
+        const json=JSON.parse(text);
+        const raw=json.contents?JSON.parse(json.contents):json;
+        const meta=raw?.chart?.result?.[0]?.meta;
+        if(meta?.regularMarketPrice>0){
+          return{
+            price:meta.regularMarketPrice,
+            prevClose:meta.chartPreviousClose||meta.regularMarketPrice,
+            chgPct:meta.regularMarketChangePercent||0,
+            source:'Yahoo'
+          };
+        }
+      }catch(e){continue;}
+    }
   }
   return null;
 }
@@ -1912,15 +2033,13 @@ async function fetchSingleStockPrice(sym){
 }
 
 async function fetchYahooBatch(symbols){
+  // Try batch Yahoo first
   const syms=symbols.join(',');
-  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent,regularMarketPreviousClose`;
-  const proxies=[
-    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  ];
-  for(const proxy of proxies){
+  const url=`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${syms}&fields=regularMarketPrice,regularMarketChangePercent`;
+  const bases=['https://api.allorigins.win/get?url=','https://corsproxy.io/?','https://api.codetabs.com/v1/proxy?quest='];
+  for(const base of bases){
     try{
-      const res=await fetch(proxy,{signal:AbortSignal.timeout(10000)});
+      const res=await fetch(base+encodeURIComponent(url),{signal:AbortSignal.timeout(10000)});
       if(!res.ok)continue;
       const text=await res.text();
       const json=JSON.parse(text);
@@ -1929,7 +2048,13 @@ async function fetchYahooBatch(symbols){
       if(results.length>0)return results;
     }catch(e){continue;}
   }
-  return[];
+  // Fallback: fetch individually via Finnhub for top stocks
+  const results=[];
+  for(const sym of symbols.slice(0,8)){
+    const r=await fetchFinnhub(sym);
+    if(r)results.push({symbol:sym,regularMarketPrice:r.price,regularMarketChangePercent:r.chgPct});
+  }
+  return results;
 }
 
 // Alpaca real-time latest quotes
@@ -2742,6 +2867,282 @@ function renderPlan(body){
     ].map(([t,d])=>`<div style="display:flex;gap:8px;margin-bottom:5px"><span style="font-size:.56rem;color:var(--accent);font-weight:600;min-width:80px">${t}</span><span style="font-size:.56rem;color:var(--muted2)">${d}</span></div>`).join('')}
   </div>`;
 }
+
+// ════════════════════════════════════════
+// RIGHT SIDEBAR TABS
+// ════════════════════════════════════════
+let _srTab = 'news';
+function switchSrTab(tab) {
+  _srTab = tab;
+  const tabs = {news:'stNews', fx:'stFx', alerts:'stAlerts'};
+  Object.entries(tabs).forEach(([t, id]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const active = t === tab;
+    el.style.borderBottomColor = active ? 'var(--accent)' : 'transparent';
+    el.style.color = active ? 'var(--accent)' : 'var(--muted2)';
+  });
+  if (tab === 'news') loadSrNews();
+  else if (tab === 'fx') renderFxPanel();
+  else if (tab === 'alerts') renderSrAlerts();
+}
+
+function loadSrNews() {
+  const body = document.getElementById('srBody');
+  if (!body) return;
+  body.innerHTML = '<div class="loading"><div class="spin"></div>Loading news…</div>';
+  loadNews(); // call existing loadNews which now targets srBody
+}
+
+// Override gnFeed to use srBody
+const _origLoadNews = window.loadNews;
+// Patch: after loadNews runs, copy gnFeed to srBody if needed
+function ensureSrBody() {
+  const gn = document.getElementById('gnFeed');
+  const sr = document.getElementById('srBody');
+  if (gn && sr && _srTab === 'news') sr.innerHTML = gn.innerHTML;
+}
+
+function renderFxPanel() {
+  const body = document.getElementById('srBody');
+  if (!body) return;
+  const pairs = (typeof FOREX !== 'undefined') ? FOREX : [];
+  if (!pairs.length) {
+    body.innerHTML = '<div style="padding:14px;font-size:.62rem;color:var(--muted2)">Loading forex…</div>';
+    return;
+  }
+  const groups = [
+    {label:'💵 Major Pairs', items: pairs.filter(f => ['EUR/USD','GBP/USD','USD/JPY','USD/CHF','AUD/USD','USD/CAD','NZD/USD'].includes(f.pair))},
+    {label:'🔀 Cross Pairs', items: pairs.filter(f => ['EUR/JPY','GBP/JPY','EUR/GBP'].includes(f.pair))},
+    {label:'⚡ Emerging', items: pairs.filter(f => ['USD/MXN','USD/BRL'].includes(f.pair))},
+    {label:'🏅 Commodities', items: pairs.filter(f => ['XAU/USD','XAG/USD'].includes(f.pair))},
+    {label:'₿ Crypto', items: pairs.filter(f => ['BTC/USD','ETH/USD'].includes(f.pair))},
+  ];
+  body.innerHTML = groups.map(g => {
+    if (!g.items.length) return '';
+    return `<div style="padding:5px 12px 2px;font-size:.5rem;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;font-weight:600;background:var(--surface2);border-bottom:1px solid var(--border)">${g.label}</div>` +
+    g.items.map(fx => {
+      const neg = fx.chg < 0;
+      const sc = fx.signal==='buy'?'var(--green)':fx.signal==='sell'?'var(--red)':'var(--yellow)';
+      const sigLbl = fx.signal==='buy'?'LONG':fx.signal==='sell'?'SHORT':'WAIT';
+      const dec = ['JPY','BTC','XAU'].some(x=>fx.pair.includes(x)) ? 2 : 4;
+      return `<div onclick="selectForexPair('${fx.pair}')" style="padding:7px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s" onmouseover="this.style.background='rgba(244,114,168,.06)'" onmouseout="this.style.background=''">
+        <div>
+          <div style="font-size:.76rem;font-weight:700;font-family:'DM Mono',monospace">${fx.pair}</div>
+          <div style="font-size:.52rem;color:var(--muted2)">${fx.name}</div>
+          <div style="font-size:.48rem;color:var(--muted)">${fx.desc}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:.82rem;font-family:'DM Mono',monospace;font-weight:600;color:${neg?'var(--red)':'var(--green)'}">${fx.rate.toFixed(dec)}</div>
+          <div style="font-size:.58rem;font-family:'DM Mono',monospace;color:${neg?'var(--red)':'var(--green)'}">${neg?'':'+'}${fx.chg.toFixed(2)}%</div>
+          <div style="font-size:.5rem;font-weight:700;color:${sc};margin-top:1px">${sigLbl}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }).join('');
+}
+
+function renderSrAlerts() {
+  const body = document.getElementById('srBody');
+  if (!body) return;
+  const logs = (typeof alertLog !== 'undefined') ? alertLog : [];
+  body.innerHTML = `
+    <div style="padding:7px 12px 5px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);flex-shrink:0">
+      <span style="font-size:.54rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600">🔔 Signal Alerts</span>
+      <button onclick="if(typeof clearAlerts==='function')clearAlerts();renderSrAlerts();" style="background:none;border:1px solid var(--border);padding:1px 7px;border-radius:6px;font-size:.54rem;color:var(--muted2);cursor:pointer">Clear</button>
+    </div>
+    <div style="padding:6px 12px 5px;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--border)">
+      <label style="display:flex;gap:3px;align-items:center;font-size:.54rem;color:var(--muted2);cursor:pointer"><input type="checkbox" id="togSound2" checked> 🔊 Sound</label>
+      <label style="display:flex;gap:3px;align-items:center;font-size:.54rem;color:var(--muted2);cursor:pointer"><input type="checkbox" id="togBuy2" checked> 🟢 Buy</label>
+      <label style="display:flex;gap:3px;align-items:center;font-size:.54rem;color:var(--muted2);cursor:pointer"><input type="checkbox" id="togSell2" checked> 🔴 Sell</label>
+    </div>` +
+    (logs.length ? logs.slice().reverse().slice(0,30).map(a => {
+      const sc = a.signal==='buy'?'var(--green)':a.signal==='sell'?'var(--red)':'var(--yellow)';
+      return `<div style="padding:6px 11px;border-bottom:1px solid rgba(242,214,228,.25);display:flex;gap:6px;align-items:flex-start">
+        <div style="width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:4px;background:${sc}"></div>
+        <div>
+          <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+            <span style="font-size:.72rem;font-weight:700">${a.sym||a.symbol||'?'}</span>
+            <span style="font-size:.5rem;font-weight:700;padding:1px 5px;border-radius:5px;background:${sc}18;color:${sc};border:1px solid ${sc}44">${(a.signal||'?').toUpperCase()}</span>
+            <span style="font-size:.62rem;font-family:'DM Mono',monospace">$${parseFloat(a.price||0).toFixed(2)}</span>
+          </div>
+          <div style="font-size:.55rem;color:var(--muted2)">${a.reason||''}</div>
+          <div style="font-size:.48rem;color:var(--muted)">${a.time||''}</div>
+        </div>
+      </div>`;
+    }).join('') : '<div style="padding:20px;text-align:center;font-size:.62rem;color:var(--muted)">✿ No alerts yet — monitoring…</div>');
+}
+
+// SELECT FOREX PAIR
+function selectForexPair(pair) {
+  const fx = (typeof FOREX !== 'undefined') ? FOREX.find(f=>f.pair===pair) : null;
+  if (!fx) return;
+  // Update header
+  document.getElementById('hSym').textContent = fx.pair;
+  if (document.getElementById('hCo')) document.getElementById('hCo').textContent = fx.name + ' · Forex · ' + fx.desc;
+  const neg = fx.chg < 0;
+  const dec = ['JPY','BTC','XAU','ETH'].some(x=>fx.pair.includes(x)) ? 2 : 4;
+  const priceEl = document.getElementById('hPrice');
+  if (priceEl) { priceEl.textContent = fx.rate.toFixed(dec); priceEl.className = 'h-price ' + (neg?'red':'green'); }
+  const chgEl = document.getElementById('hChg');
+  if (chgEl) chgEl.innerHTML = `<span class="${neg?'red':'green'}">${neg?'':'+'}${fx.chg.toFixed(2)}% today</span>`;
+  // Signal box
+  const col = fx.signal==='buy'?'var(--green)':fx.signal==='sell'?'var(--red)':'var(--yellow)';
+  const sigBox = document.getElementById('hSigBox');
+  if (sigBox) sigBox.innerHTML = `<div class="sig-box ${fx.signal}" style="display:inline-flex;gap:8px;align-items:center;padding:7px 12px;border-radius:12px;border:1.5px solid ${col}44;background:${col}08;margin-top:6px">
+    <div style="font-size:1.1rem">💱</div>
+    <div>
+      <div style="font-size:.52rem;color:var(--muted2);letter-spacing:.1em;text-transform:uppercase">Forex · ${fx.pair}</div>
+      <div style="font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700;color:${col}">${fx.signal==='buy'?'LONG':fx.signal==='sell'?'SHORT':'NEUTRAL'}</div>
+      <div style="font-size:.58rem;color:${col}">${fx.desc} · Technical signal</div>
+    </div>
+  </div>`;
+  // TradingView
+  const tvMap = {'XAUUSD':'OANDA:XAUUSD','XAGUSD':'OANDA:XAGUSD','BTCUSD':'BITSTAMP:BTCUSD','ETHUSD':'BITSTAMP:ETHUSD'};
+  const tvSym = fx.pair.replace('/','');
+  const tvPair = tvMap[tvSym] || ('FX:' + tvSym);
+  const frame = document.getElementById('tvFrame') || document.getElementById('tvChart');
+  if (frame && frame.tagName === 'IFRAME') {
+    frame.src = `https://s.tradingview.com/widgetembed/?frameElementId=tvFrame&symbol=${tvPair}&interval=60&hidesidetoolbar=1&symboledit=1&saveimage=0&toolbarbg=fff8fb&theme=light&style=1&timezone=America%2FNew_York&withdateranges=1&locale=en`;
+  }
+  // Data bar
+  const dsSrc = document.getElementById('dsSrc');
+  if (dsSrc) dsSrc.innerHTML = '<span style="color:var(--green)">✓ Forex · Live quotes</span>';
+}
+
+// MAKE SEARCH INCLUDE FOREX
+const _origLiveFilter = window.liveFilter;
+const _origFilterMo = window.filterMo;
+const _origDoSearch = window.doSearch;
+
+function liveFilter(val) {
+  const q = val.trim().toLowerCase();
+  const dd = document.getElementById('sdrop');
+  if (!q) { if(dd) dd.style.display='none'; return; }
+  
+  // Search stocks
+  const stockRes = (typeof STOCKS !== 'undefined') ? STOCKS.filter(s =>
+    s.sym.toLowerCase().includes(q) || s.name.toLowerCase().includes(q) || (s.sector||'').toLowerCase().includes(q)
+  ).slice(0,5) : [];
+  
+  // Search forex
+  const fxRes = (typeof FOREX !== 'undefined') ? FOREX.filter(f =>
+    f.pair.toLowerCase().includes(q) || f.name.toLowerCase().includes(q)
+  ).slice(0,3) : [];
+  
+  const all = [...stockRes, ...fxRes];
+  if (!all.length) {
+    if (dd) { dd.style.display='block'; setDdStyle(dd); dd.innerHTML=`<div style="padding:9px 11px;font-size:.62rem;color:var(--muted2)">Press Enter to AI-search <b>"${val}"</b> across all markets</div>`; }
+    return;
+  }
+  
+  if (dd) {
+    setDdStyle(dd);
+    dd.innerHTML = all.map(item => {
+      if (item.pair) {
+        const neg=item.chg<0, dec=['JPY','BTC','XAU','ETH'].some(x=>item.pair.includes(x))?2:4;
+        const sc=item.signal==='buy'?'var(--green)':item.signal==='sell'?'var(--red)':'var(--yellow)';
+        return `<div class="sri" onclick="selectForexPair('${item.pair}');document.getElementById('sdrop').style.display='none';document.getElementById('hInput').value=''">
+          <div><div><span class="ssym">${item.pair}</span><span class="ssec">Forex</span></div><div class="snm">${item.name}</div></div>
+          <div style="text-align:right"><div class="spx ${neg?'red':'green'}">${item.rate.toFixed(dec)}</div><div style="font-size:.5rem;font-weight:700;color:${sc}">${item.signal==='buy'?'LONG':item.signal==='sell'?'SHORT':'WAIT'}</div></div>
+        </div>`;
+      } else {
+        const neg=item.chg<0;
+        const sc=item.signal==='buy'?'var(--green)':item.signal==='sell'?'var(--red)':'var(--yellow)';
+        return `<div class="sri" onclick="selectStock(STOCKS.find(x=>x.sym==='${item.sym}'));document.getElementById('sdrop').style.display='none';document.getElementById('hInput').value=''">
+          <div><div><span class="ssym">${item.sym}</span><span class="ssec">${item.sector||''}</span></div><div class="snm">${item.name}</div></div>
+          <div style="text-align:right"><div class="spx ${neg?'red':'green'}">$${item.price.toFixed(2)}</div><div style="font-size:.5rem;font-weight:700;color:${sc}">${item.signal.toUpperCase()}</div></div>
+        </div>`;
+      }
+    }).join('');
+  }
+}
+
+function setDdStyle(dd) {
+  dd.style.cssText = 'display:block;position:fixed;z-index:400;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(232,84,122,.18);padding:5px;max-height:300px;overflow-y:auto;width:370px;top:52px;left:50%;transform:translateX(-50%)';
+}
+
+function doSearch() {
+  const q = document.getElementById('hInput')?.value.trim();
+  if (!q) return;
+  const dd = document.getElementById('sdrop');
+  if (dd) dd.style.display = 'none';
+  const ql = q.toLowerCase();
+  // Check forex first
+  const fxExact = (typeof FOREX !== 'undefined') ? FOREX.find(f =>
+    f.pair.toLowerCase() === ql || f.pair.toLowerCase().replace('/','') === ql.replace('/','')
+  ) : null;
+  if (fxExact) { selectForexPair(fxExact.pair); document.getElementById('hInput').value=''; return; }
+  // Check stocks exact
+  const exact = (typeof STOCKS !== 'undefined') ? STOCKS.find(s => s.sym.toLowerCase() === ql) : null;
+  if (exact) { selectStock(exact); document.getElementById('hInput').value=''; return; }
+  // Name match
+  const found = (typeof STOCKS !== 'undefined') ? STOCKS.filter(s => s.name.toLowerCase().includes(ql) || s.sym.toLowerCase().includes(ql)) : [];
+  if (found.length === 1) { selectStock(found[0]); document.getElementById('hInput').value=''; return; }
+  // Open modal
+  document.getElementById('hInput').value = '';
+  const mi = document.getElementById('mInput'); if (mi) mi.value = q;
+  const mo = document.getElementById('sMo'); if (mo) mo.classList.add('show');
+  filterMo(q);
+  if (!found.length) setTimeout(() => aiSearch(), 300);
+}
+
+// Override filterMo to include forex
+function filterMo(val) {
+  const q = val.trim().toLowerCase();
+  const c = document.getElementById('mRes');
+  if (!c) return;
+  if (!q) {
+    const cats = ['Stocks','ETFs','Crypto','AI','Forex','Gold','Bitcoin','Meme','Energy'];
+    c.innerHTML = `<div style="font-size:.54rem;color:var(--muted2);margin-bottom:6px">Browse by category:</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:9px">${cats.map(cat=>`<span onclick="filterMo('${cat.toLowerCase()}')" style="padding:3px 10px;border-radius:20px;background:var(--surface2);border:1.5px solid var(--border);font-size:.6rem;cursor:pointer;color:var(--accent)">${cat}</span>`).join('')}</div>
+      <div style="font-size:.54rem;color:var(--muted2);margin-bottom:5px">Popular</div>` +
+      (typeof STOCKS!=='undefined' ? STOCKS.slice(0,12).map(s=>moCard(s)).join('') : '');
+    return;
+  }
+  const stocks = (typeof STOCKS!=='undefined') ? STOCKS.filter(s => s.sym.toLowerCase().includes(q)||s.name.toLowerCase().includes(q)||(s.sector||'').toLowerCase().includes(q)) : [];
+  const fx = (typeof FOREX!=='undefined') ? FOREX.filter(f => f.pair.toLowerCase().includes(q)||f.name.toLowerCase().includes(q)||(f.desc||'').toLowerCase().includes(q)) : [];
+  if (!stocks.length && !fx.length) {
+    c.innerHTML = `<div style="text-align:center;padding:16px 8px;color:var(--muted2)">
+      <div style="font-size:1rem;margin-bottom:5px">🔍</div>
+      <div style="font-size:.64rem;margin-bottom:8px">No local results for "<b>${val}</b>"</div>
+      <button onclick="aiSearch()" style="padding:7px 14px;background:linear-gradient(135deg,var(--accent),var(--pink));border:none;border-radius:10px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.64rem;font-weight:600;cursor:pointer">✦ AI Search All Markets</button>
+    </div>`;
+    return;
+  }
+  let html = '';
+  if (fx.length) {
+    html += `<div style="font-size:.54rem;color:var(--muted2);margin-bottom:5px">💱 Forex / Commodities / Crypto</div>` + fx.map(fxCard).join('');
+    if (stocks.length) html += `<div style="font-size:.54rem;color:var(--muted2);margin:8px 0 5px">📊 Stocks & ETFs</div>`;
+  }
+  html += stocks.slice(0,15).map(s=>moCard(s)).join('');
+  c.innerHTML = html;
+}
+
+function moCard(s) {
+  const neg=s.chg<0, on=typeof favs!=='undefined'&&favs.includes(s.sym);
+  const sc=s.signal==='buy'?'var(--green)':s.signal==='sell'?'var(--red)':'var(--yellow)';
+  return `<div class="sri" onclick="selectStock(STOCKS.find(x=>x.sym==='${s.sym}'));closeMo('sMo')">
+    <div><div><span class="ssym">${s.sym}</span><span class="ssec">${s.sector||''}</span>${on?'<span style="margin-left:3px">★</span>':''}</div><div class="snm">${s.name}</div></div>
+    <div style="text-align:right"><div class="spx ${neg?'red':'green'}">$${s.price.toFixed(2)}</div><div style="font-size:.52rem;font-weight:700;color:${sc}">${s.signal.toUpperCase()}</div></div>
+  </div>`;
+}
+
+function fxCard(fx) {
+  const neg=fx.chg<0;
+  const sc=fx.signal==='buy'?'var(--green)':fx.signal==='sell'?'var(--red)':'var(--yellow)';
+  const dec=['JPY','BTC','XAU','ETH'].some(x=>fx.pair.includes(x))?2:4;
+  return `<div class="sri" onclick="selectForexPair('${fx.pair}');closeMo('sMo')">
+    <div><div><span class="ssym">${fx.pair}</span><span class="ssec">Forex</span></div><div class="snm">${fx.name}</div></div>
+    <div style="text-align:right"><div class="spx ${neg?'red':'green'}">${fx.rate.toFixed(dec)}</div><div style="font-size:.52rem;font-weight:700;color:${sc}">${fx.signal==='buy'?'LONG':fx.signal==='sell'?'SHORT':'NEUTRAL'}</div></div>
+  </div>`;
+}
+
+// Init right sidebar on load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => { if(typeof loadNews==='function') loadNews(); }, 1600);
+});
+
 </script>
 
 </body>
